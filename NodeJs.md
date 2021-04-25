@@ -916,7 +916,6 @@ module.exports = Captcha
 
 ```js
 const router = require('express').Router()
-const handleDB = require('../db/handleDB')
 const Captcha = require('../utils/captcha')
 
 router.get('/passport/image_code/:float', (req, res) => {
@@ -925,6 +924,9 @@ router.get('/passport/image_code/:float', (req, res) => {
 
     // captcha.text  // 图片验证码文本
     // captcha.data  // 图片验证码图片内容信息
+
+    // 保存图片验证码文本到session
+    req.session['imageCode'] = captcha.text
 
     res.setHeader('Content-Type', 'image/svg+xml')
     res.send(captcha.data)
