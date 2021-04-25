@@ -856,6 +856,14 @@ router.all("/register",(res,req)=>{
     ....
 })
 
+function getRandomString(n) {
+    let str = ''
+    while(str.length<n){
+        str+=Math.random().toString(36).substr(2)
+    }
+    return str.substr(str.length-n)
+}
+
 function csrfProtect(req, res, next){
     let method = req.method
     if(method=="GET"){
@@ -933,5 +941,53 @@ router.get('/passport/image_code/:float', (req, res) => {
 })
 
 module.exports = router
+```
+
+## 加密及编码
+
+1. 为什么需要加密：
+
+   ​	为了保证我们的数据能够在网络上进行安全的传输
+
+2. 常见加密算法：
+
+   - 不可逆算法：密码散列函数（英语：Cryptographic hash function），又译为加密散列函数、密码散列函数、加密散列函数，是散列函数的一种。它被认为是一种单向函数，也就是说极其难以由散列函数输出的结果，回推输入的数据是什么。这样的单向函数被称为“现代密码学的驮马”。这种散列函数的输入数据，通常被称为消息（message），而它的输出结果，经常被称为消息摘要（message digest）或摘要（digest）。
+
+   - 可逆算法：
+
+     - 对称加密：将信息使用一个密钥进行加密，解密时使用同样的密钥，同样的算法进行解密。
+
+     - 非对称加密：又称公开密钥加密，是加密和解密使用不同密钥的算法，广泛用于信息传输中。
+
+3. 项目中的密码学
+
+   项目中用户身份信息的密码字段都是使用密文进行存储（单项散列函数处理）
+
+   常见的单项散列函数处理方式有：   **md5**     和   **sha256**
+
+   项目中使用双重md5加盐来对密码进行存储前的加密
+
+   ```js
+   const md5 = require('md5')
+   const salt = 'dkl$UY(*Q&!#Jo))(!A^#1)U($MO0'
+   
+   let result = md5(md5(password) + salt)
+   ```
+
+### JWT
+
+```js
+// 生成token值
+const jwt = require('jsonwebtoken');
+const salt = 'dkl$UY(*Q&!#Jo))(!A^#1)U($MO0'
+const token = jwt.sign({id:1,username:"zhangsan"},salt,{expiresIn: 60 * 60 * 2})   //expiresIn为过期时间，单位是秒
+
+// 验证token
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ6aGFuZ3NhbiIsImlhdCI6MTU4NjEyNTUwMywiZXhwIjoxNTg2MTMyNzAzfQ.Uwx-EzPq2c9oDJxfs0nCrWLAcTS89HxPBqTUbx91gwY"
+try{
+    var userData = jwt.verify(token, salt);   //获取token中的数据(用户信息)
+}catch(e){
+    console.log("token已经过期")
+}
 ```
 
