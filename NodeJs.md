@@ -318,6 +318,16 @@ app.listen(3000, () => {
 });
 ```
 
+### 生成MySQL时间对象
+
+```js
+const moment = require('moment')
+
+let dataNow = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+```
+
+
+
 ### ORM对象-关系映射
 
 - ./db/node-orm/index.js 数据库连接设置
