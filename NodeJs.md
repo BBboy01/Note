@@ -101,7 +101,9 @@ app.post('/test', (req, res) => {
 })
 ```
 
-## 路由的抽离
+## 路由
+
+### 路由的抽离
 
 ```js
 // server.js
@@ -139,7 +141,7 @@ router.get('/', (req, res) => {
 module.exports = router
 ```
 
-## 处理请求前的钩子函数
+### 处理请求前的钩子函数
 
 ```js
 // server.js
@@ -164,6 +166,67 @@ function hookFun(req, res, next) {
 module.exports = {
     hookFun
 }
+```
+
+### 处理请求后的钩子函数
+
+```js
+// server.js
+
+const { hookFun } = require('./hooks/hook.js')
+
+router.get('/data', (req, res, next) => {
+    res.send('ok')
+    next()
+})
+
+app.use(router, hookFun)
+
+
+// hooks/hook.js
+
+function hookFun(req, res) {
+    console.log('执行router的路由接口后再执行此钩子函数')
+    
+    if (true) {
+        res.send('ok')
+    }
+}
+
+module.exports = {
+    hookFun
+}
+```
+
+### 中间件执行顺序原理
+
+![img](file://D:\Joy\QQ\PersonalFeils\1156678002\FileRecv\Nodejs\day20\assets\16eda68e1b84e16e?lastModify=1619598133)
+
+![img](file://D:\Joy\QQ\PersonalFeils\1156678002\FileRecv\Nodejs\day20\assets\16efc9f00cea9b30?lastModify=1619598055)
+
+```js
+function func1 (req, res, next) {
+    console.log("func1") // 1
+    next()
+    console.log(11111111)  // 4
+}
+
+router.get("/get_data", (req, res, next) => {
+    console.log("get_data")   //2
+    // res.send("get_data");
+    next()
+    console.log(22222222)   // 3
+})
+
+function func2 (req, res, next) {
+    console.log("func2")   // 5
+}
+
+app.use(func1, router, func2)
+
+app.listen(3008, () => {
+    console.log(`服务器已经启动，端口为：3008`)
+})
 ```
 
 ## 模板渲染
@@ -325,8 +388,6 @@ const moment = require('moment')
 
 let dataNow = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
 ```
-
-
 
 ### ORM对象-关系映射
 
@@ -1029,3 +1090,116 @@ router.post('/user/pic_info', upload.single('avatar'), (req, res) => {  // the p
 <input type="file" name="avatar" class="input_file" id="upload_file" onchange="changepic(this)">
 ```
 
+## CORS跨域请求
+
+跨域，是指**浏览器不能执行其他网站的脚本**。它是**由浏览器的同源策略造成**的，是浏览器对JavaScript实施的安全限制。
+
+同源策略限制了一下行为：
+
+- Cookie无法读取
+- DOM 和 JS 对象无法获取
+- Ajax请求发送不出去
+
+**同源是指，域名、协议、端口均为相同**
+
+- 如何处理跨域带来的ajax问题？(解决跨域方案)
+
+1. jsonp —— JSON Padding
+
+2. 设置代理服务器  （正向代理，  反向代理）
+
+3. 后端设置响应头Access-Control-Allow-Origin
+
+```js
+res.setHeader("Access-Control-Allow-Origin", "*")
+```
+
+### JSONP
+
+- 处理使用ajax代码发起请求外，页面某些标签也会自动发起请求。我们可以利用script标签的src属性，来发起请求。
+
+- jsonp 就是前端利用 script 在页面不刷新的情况下和服务器进行交互一种技术。拿 json 格式的数据去填充一个函数，英语：json with paddding a function 简称：jsonp
+
+  ![跨域和jsonp](NodeJs.assets/跨域和jsonp.png)
+
+#### 普通模式使用
+
+```html
+<!-- frontend -->
+<p><span id="sp1"></span>的年龄是<span id="sp2"></span></p>
+<script>
+    function callback(data){
+    	console.log("执行了callback");
+        $("#sp1").html(data.name)
+        $("#sp2").html(data.age)
+    }    
+</script>
+<!-- jsonp 原理，不会出现跨域-->
+<script src="http://localhost:3001/get_data"></script>
+```
+
+```js
+// backend
+const express = require("express");
+const app = express();
+app.get("/get_data",(req, res)=>{   
+    // 按照jsonp原理来响应:
+    res.send('callback({name:"node", age:"11"})')
+})
+app.listen(3001, ()=>{
+    console.log(`服务器已经启动，端口为：3001`);
+})
+```
+
+#### express中应用jsonp
+
+```html
+<!-- frontend -->
+<script>
+    function foo(data){
+    	console.log("执行了callback");
+        $("#sp1").html(data.name)
+        $("#sp2").html(data.age)
+    }    
+</script>
+<script src="http://localhost:3001/get_data?callback=foo"></script>
+<!--这里第一个callback是固定，=号后面的callback是我们回调函数的名字 -->
+```
+
+```js
+// backend
+const express = require("express");
+const app = express();
+app.get("/get_data",(req, res)=>{
+    // express封装好的方法jsonp
+    res.jsonp({name:"node", age:"11"})
+})
+app.listen(3001, ()=>{
+    console.log('服务器已经启动，端口为：3001');
+})
+```
+
+### 后端设置响应头
+
+- 后端设置响应头：res.setHeader("Access-Control-Allow-Origin", "*")
+
+- 前端代码无需任何设置
+
+```js
+const express = require("express");
+const app = express();
+app.get("/get_data",(req, res)=>{
+    res.setHeader("Access-Control-Allow-Origin", "*")
+    res.send({name:"node", age:"11"})
+})
+app.listen(3001, ()=>{
+    console.log(`服务器已经启动，端口为：3001`);
+})
+```
+
+### 使用cors模块
+
+```js
+const cors = require("cors");
+app.use(cors())
+```
