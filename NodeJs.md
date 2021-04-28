@@ -1001,3 +1001,31 @@ try{
 }
 ```
 
+## 获取前端传递的文件
+
+```js
+// pic_router.js
+const multer = require('multer')
+
+const upload = multer({ dest: 'public/news/upload/avatar' })  // sign the upload avatar path
+
+router.post('/user/pic_info', upload.single('avatar'), (req, res) => {  // the param of 'avatar' is your name of input tag
+    console.log(req.file)
+    /**{
+            fieldname: 'avatar',
+            originalname: '四层板设计流程.png',
+            encoding: '7bit',
+            mimetype: 'image/png',
+            destination: 'public/news/upload/avatar',
+            filename: '2ebfb5f2984a4bcc5e403836d85810b5',
+            path: 'public\\news\\upload\\avatar\\2ebfb5f2984a4bcc5e403836d85810b5',
+            size: 990825
+    }*/
+    res.send(req.file)
+})
+
+
+// pic.html
+<input type="file" name="avatar" class="input_file" id="upload_file" onchange="changepic(this)">
+```
+
