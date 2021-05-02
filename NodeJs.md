@@ -887,7 +887,7 @@ module.exports = handleDB
 - 在项目中：
 
 ```js
-const db = require("./db/handleDB");
+const handleDB = require("./db/handleDB");
 
 app.get("/", (req,res)=>{
 	(async function(){
@@ -1258,6 +1258,34 @@ app.listen(3000, ()=>{
 });
 ```
 
+## 路由钩子
+
+```js
+const Koa = require("koa");
+const bodyParser = require("koa-bodyparser");
+const router = require("./routers/note");
+const koaRouter = require("koa-router")();
+
+const app = new Koa();
+
+async function test(ctx, next) {
+  console.log("dio");
+  await next();
+  console.log("jojo");
+}
+
+app.use(test);
+app.use(router.routes());
+app.use(koaRouter.allowedMethods()); // according to 'ctx.status' to set response header of 'response'
+app.use(bodyParser);
+
+app.listen(3000, () => {
+  console.log(`server runs in http://localhost:3000/`);
+});
+```
+
+
+
 ## 获取请求参数（GET参数）
 
 ```js
@@ -1356,7 +1384,7 @@ app.listen(3000, ()=>{
 
 ```js
 const session = require('koa-session');
-app.keys = ['$%^&**%$#%$#&^*&)*&*&^$%#$%$&^&**'];
+app.keys = ['$%^&**%$#%$#&^*&)*&*&^$%#$%$&^&**'];  // 设置签名
 app.use(session({maxAge:1000 * 3600}, app));
 router.get("/", function (ctx){
     ctx.session.age = 11;    // 设置session
