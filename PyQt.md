@@ -3,7 +3,7 @@
 - QDialog: 是对话窗口的基类。没有菜单栏、工具栏、状态栏
 - QWidget: 不确定窗口的用途时使用
 
-## 窗口中的方法()
+## 窗口中的方法
 继承QMainWindow
 - self.setWindowTitle('设置窗口的标题')
 - self.resize(width, height)  设置窗口的尺寸
