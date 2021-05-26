@@ -200,10 +200,6 @@ module.exports = {
 
 ### 中间件执行顺序原理
 
-![img](file://D:\Joy\QQ\PersonalFeils\1156678002\FileRecv\Nodejs\day20\assets\16eda68e1b84e16e?lastModify=1619598133)
-
-![img](file://D:\Joy\QQ\PersonalFeils\1156678002\FileRecv\Nodejs\day20\assets\16efc9f00cea9b30?lastModify=1619598055)
-
 ```js
 function func1 (req, res, next) {
     console.log("func1") // 1
@@ -906,7 +902,7 @@ app.get("/", (req,res)=>{
 
 - CSRF请求伪造的示意图：
 
-![CSRF攻击过程](NodeJs.assets/CSRF攻击过程.png)
+![CSRF攻击过程](./NodeJs.assets/CSRF攻击过程.png)
 
 ### CSRF防护思路
 
@@ -1045,24 +1041,126 @@ module.exports = router
    let result = md5(md5(password) + salt)
    ```
 
-### JWT
+### Base64
 
-![jwt](NodeJs.assets/jwt.png)
+Encoding
 
 ```js
-// 生成token值
+// plain-text string
+const str = 'Base64 Encoding in Node.js';
+
+// create a buffer
+const buff = Buffer.from(str, 'utf-8');
+
+// decode buffer as Base64
+const base64 = buff.toString('base64');
+
+// print Base64 string
+console.log(base64);
+
+// QmFzZTY0IEVuY29kaW5nIGluIE5vZGUuanM=
+```
+
+Decoding
+
+```js
+// Base64 encoded string
+const base64 = 'QmFzZTY0IEVuY29kaW5nIGluIE5vZGUuanM=';
+
+// create a buffer
+const buff = Buffer.from(base64, 'base64');
+
+// decode buffer as UTF-8
+const str = buff.toString('utf-8');
+
+// print normal string
+console.log(str);
+
+// Base64 Encoding in Node.js
+```
+
+
+
+### JWT
+
+![jwt](./NodeJs.assets/jwt.png)
+
+- 生成token值
+
+```js
 const jwt = require('jsonwebtoken');
 const salt = 'dkl$UY(*Q&!#Jo))(!A^#1)U($MO0'
-const token = jwt.sign({id:1,username:"zhangsan"},salt,{expiresIn: 60 * 60 * 2})   //expiresIn为过期时间，单位是秒
 
-// 验证token
+// payload                     // 需要加密的内容
+// secretOrPrivateKey          // 加密所用的字符串或者private.key密钥文件
+// options                     // 参数列表
+/*{
+	algorithm: 'HS256',    // 加密使用的算法  如果不使用private.key 只能使用HS开头的算法
+	expiresIn:'10s'		   // 有效时间 若加密内容不是对象 则无法设置有效时间  可以是数字(s)、字符串 如 60, "2 days", "10h", "7d". 
+}*/
+const token = jwt.sign({id:1,username:"zhangsan"},salt,{expiresIn: 60 * 60 * 2})
+```
+
+- 验证token
+
+```js
 const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ6aGFuZ3NhbiIsImlhdCI6MTU4NjEyNTUwMywiZXhwIjoxNTg2MTMyNzAzfQ.Uwx-EzPq2c9oDJxfs0nCrWLAcTS89HxPBqTUbx91gwY"
 try{
-    var userData = jwt.verify(token, salt);   //获取token中的数据(用户信息)
+    let payload  = jwt.verify(token.split(' ')[1], salt);   //获取token中的数据(用户信息)
 }catch(e){
     console.log("token已经过期")
 }
 ```
+
+> 如果使用了 `koa-jwt`，可以直接调用 `ctx.state.user` 来获取 payload 内容
+
+```js
+const jwtAuth = require('koa-jwt')
+
+// 中间件的方式进行验证
+router.get('/getUser-token', jwtAuth({ salt }), async ctx => {
+    let payload = ctx.state.user
+    ctx.body = {
+        msg: 'ok',
+        data: payload
+    }
+})
+```
+
+- 前端
+
+```js
+axios.interceptors.request.use( config => {
+    const token = window.localStorage.getItem('token')
+        // 判断是否存在token
+        if (token) {
+            // token存在的话就在每个请求头上加上token
+            // Bearer是JWT的认证头部信息
+            config.headers.common["Authorization"] = "Bearer " + token
+        }
+    return config
+}, err => {
+    return Promise.reject(err)
+})
+```
+
+### 路由拦截
+
+`koa-jwt` 提供了一个路由拦截的功能，用户拥有 Token 和未拥有 Token 可访问的接口权限不一样。比如，没有登录的用户只能访问 `/login` 和 `/register` 接口，而登录之后才能访问其他接口的地址，我们要在路由匹配前加入如下的中间件：
+
+```js
+/* 路由权限控制 */
+app.use(jwtKoa({ secret: secret }).unless({
+  // 设置login、register接口，可以不需要认证访问
+  path: [
+    /^\/api\/login/,
+    /^\/api\/register/,
+    /^((?!\/api).)*$/   // 设置除了私有接口外的其它资源，可以不需要认证访问
+  ]
+}));
+```
+
+> 如果在这一步检查出错，即当一个请求需要携带 Token 但未携带时，会暂停执行之后的所有中间件，但是可以通过设置 `passthrough: true` 来取消这一特性
 
 ## 获取前端传递的文件
 
@@ -1122,7 +1220,7 @@ res.setHeader("Access-Control-Allow-Origin", "*")
 
 - jsonp 就是前端利用 script 在页面不刷新的情况下和服务器进行交互一种技术。拿 json 格式的数据去填充一个函数，英语：json with paddding a function 简称：jsonp
 
-  ![跨域和jsonp](NodeJs.assets/跨域和jsonp.png)
+  ![跨域和jsonp](./NodeJs.assets/跨域和jsonp.png)
 
 #### 普通模式使用
 
@@ -1482,7 +1580,7 @@ const Router = require('koa-router');
 const session = require('koa-session');
 const app = new Koa();
 
-let router = new Router();
+const router = new Router();
 app.keys = ['$%^&**%$#%$#&^*&)*&*&^$%#$%$&^&**'];
 app.use(session({maxAge:1000 * 3600}, app));
 router.get("/", function (ctx){
@@ -1497,6 +1595,130 @@ app.listen(3000, ()=>{
     console.log("server is running at port 3000");
 });
 ```
+
+### Redis代替内存存储session
+
+> 登录demo
+
+- 鉴权中间件
+
+```js
+// middleware/auth.js
+
+module.exports = async (ctx, next) => {
+    if (!ctx.session.userInfo) {
+        ctx.body = {
+            ok: 0,
+            msg: 'user has not logged in'
+        }
+    } else {
+        await next()
+    }
+}
+```
+
+- 逻辑与配置
+
+```js
+const Koa = require('koa');
+const Router = require('koa-router');
+const bodyParser = require('koa-bodyparser')
+const session = require('koa-session');
+const app = new Koa();
+const router = new Router();
+
+const redisStore = require('koa-redis')
+const redis = require('redis')
+const redisClient = redis.createClient(6379, 'localhost')
+const wrapper = require('co-redis')  // promisify
+const client = wrapper(redisClient)
+
+app.keys = ['$%^&**%$#%$#&^*&)*&*&^$%#$%$&^&**'];
+
+const SESSION_CONFIG = {
+    key: 'bbboy.sess',  // 键名
+	store: redisStore({ client })
+}
+
+app.use(bodyParser())
+app.use(session(SESSION_CONFIG), app)
+
+router.post('/login', async ctx => {
+    const {body} = ctx.request
+    // 登录逻辑 验证
+    
+    // 验证OK 设置session
+    ctx.session.userInfo = body.username
+	ctx.body = {
+        ok: 1,
+        msg: 'login success'
+    }
+})
+
+router.post('/logout', async ctx => {
+    delete ctx.session.userInfo
+    ctx.body = {
+        ok: 1,
+        msg: 'logout success'
+    }
+})
+
+router.get('/getUser', require('../middleware/auth.js'), async ctx => {
+    ctx.body = {
+        ok: 1,
+        msg: 'get user info success',
+        data: ctx.session.userInfo
+    }
+})
+```
+
+
+
+## GitHub Oauth2 授权登录
+
+- index.html
+
+```html
+<div id="app">
+    <a href="/github/login">login with github</a>
+</div>
+```
+
+- index.js
+
+```js
+const githubAuthorizationConfig = {
+    client_id,
+    client_secret
+}
+
+router.get('/github/login', async ctx => {
+    let dataStr = (new Date()).valueOf()
+    // 重定向到认证接口并配置参数
+    let authorizationPath = "https://github.com/login/oauth/authorize"
+    authorizationPath += `?client_id=${githubAuthorizationConfig.client_id}`
+    // 转发到授权服务器
+    ctx.redirect(authorizationPath)
+})
+
+router.get('/github/callback', async ctx => {
+    const code = ctx.query.code
+    const params = {
+        client_id: githubAuthorizationConfig.client_id,
+        client_secret: githubAuthorizationConfig.client_secret,
+        code
+    }
+    let res = await axios.post("https://github.com/login/oath/access_token", params)
+    const access_token = querystring.parse(res.data).access_token
+    res = await axios.get(`https://api.github.com/user?access_token=${access_token}`)
+    ctx.body = `
+	<h1>Hello ${res.data.login}</h1>
+	<img src="${res.data.avatar_url}" alt=""/>
+	`
+})
+```
+
+
 
 ## 静态资源中间件
 
