@@ -103,6 +103,17 @@ app.post('/test', (req, res) => {
 
 ## 路由
 
+### 为所有路由添加前缀
+
+```js
+const Router = require('koa-router')
+const router = new Router({prefix: '/api'})
+
+router.get('/userInfo', async ctx => {  // /api/userInfo
+    ctx.body = {code: 200, msg: 'ok'}
+})
+```
+
 ### 路由的抽离
 
 ```js
