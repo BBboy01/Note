@@ -372,13 +372,11 @@ document.getElementById('button').onclick = () => {
 
 # this,call,apply,bind 总结
 
-> 对js中的一些基本的很重要的概念做一些总结，对进一步学习js很重。
-
-**一、this**
+## **this**
 
 JavaScript 中的 this 总是指向一个对象，而具体指向那个对象是在运行时基于函数的执行环境动态绑定的，而非函数声明时的环境    　实际应用中 this 的指向大致可以分为以下 4 中：      　1. 作为对象的方法调用      　2. 作为普通函数调用      　3. 构造器调用      　4. Function.prototype.call 或 Function.prototype.apply 调用, 可以动态地改变出入函数的 this
 
-**1. 作为对象的方法调用时， this 指向该对象**(javascript:void(0)😉
+**1. 作为对象的方法调用时， this 指向该对象**
 
 ```javascript
 var obj = {
@@ -427,7 +425,7 @@ var obj = new MyClass();
 console.log(obj.name); // other
 ```
 
-**二、 call 和 apply**
+## **call 和 apply**
 
 他们的作用一模一样，区别仅在于传入参数形式的不同。 apply 接收两个参数，第一个参数指定了函数体内 this 对象的指向，第二个参数为一个带下标的集合，这个集合可以是数组，也可以是类数组，apply 方法把这个集合中的元素作为参数传入被调用的函数。 call 传入的参数不固定，跟 apply 相同的是，第一个参数也代表函数体内的 this 指向，从第二个参数开始往后，每个参数被依次传入函数
 
@@ -441,7 +439,9 @@ func.apply(null, [1, 2, 3]); // 输出：[ 1, 2, 3 ]
 func.call(null, 1, 2, 3); // 输出：[ 1, 2, 3 ]
 ```
 
-call 和 apply 的用途: **1. 改变 this 指向**
+call 和 apply 的用途: 
+
+1. **改变 this 指向**
 
 ```javascript
 var obj1 = {
@@ -478,9 +478,9 @@ var getName = function(){
 }
 ```
 
-\2. 用来模拟 Function.prototype.bind 指定函数内部的 this 指向
+2. 用来模拟 Function.prototype.bind 指定函数内部的 this 指向
 
-\3. 借用其他对象的方法， 可以模拟实现继承**
+3. **借用其他对象的方法， 可以模拟实现继承**
 
 ```javascript
  var A = function(name){
@@ -506,7 +506,7 @@ console.log( b.getName() ); // 输出： 2B铅笔
 })(1, 2); 
 ```
 
-**三、ECMAScript 5 中的 bind() 方法可以将函数绑定到一个对象上**
+## **ECMAScript 5 中的 bind() 方法可以将函数绑定到一个对象上**
 
 ```javascript
 function f(y) {return this.x + y};
