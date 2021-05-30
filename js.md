@@ -478,7 +478,7 @@ var getName = function(){
 }
 ```
 
-2. 用来模拟 Function.prototype.bind 指定函数内部的 this 指向
+2. **用来模拟 Function.prototype.bind 指定函数内部的 this 指向**
 
 3. **借用其他对象的方法， 可以模拟实现继承**
 
@@ -506,7 +506,9 @@ console.log( b.getName() ); // 输出： 2B铅笔
 })(1, 2); 
 ```
 
-## **ECMAScript 5 中的 bind() 方法可以将函数绑定到一个对象上**
+## bind
+
+bind() 方法可以将函数绑定到一个对象上
 
 ```javascript
 function f(y) {return this.x + y};
