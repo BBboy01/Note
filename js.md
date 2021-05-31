@@ -374,7 +374,12 @@ document.getElementById('button').onclick = () => {
 
 ## **this**
 
-JavaScript 中的 this 总是指向一个对象，而具体指向那个对象是在运行时基于函数的执行环境动态绑定的，而非函数声明时的环境    　实际应用中 this 的指向大致可以分为以下 4 中：      　1. 作为对象的方法调用      　2. 作为普通函数调用      　3. 构造器调用      　4. Function.prototype.call 或 Function.prototype.apply 调用, 可以动态地改变出入函数的 this
+JavaScript 中的 this 总是指向一个对象，而具体指向那个对象是在运行时基于函数的执行环境动态绑定的，而非函数声明时的环境    　实际应用中 this 的指向大致可以分为以下 4 中：
+
+1. 作为对象的方法调 
+2. 作为普通函数调
+3. 构造器调
+4. Function.prototype.call 或 Function.prototype.apply 调用, 可以动态地改变出入函数的 this
 
 **1. 作为对象的方法调用时， this 指向该对象**
 
