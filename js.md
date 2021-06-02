@@ -529,7 +529,6 @@ g(2); // 3
 ```js
 function shellOuter () {
     let a = 1;
-    
     return () => {
         console.log(a)
     }
