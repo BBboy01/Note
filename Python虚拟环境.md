@@ -2,8 +2,9 @@
 
 ```shell
 virtualenv envname01  |  mkvirtualenv envname02 
-右边的创建后会自动进入虚拟环境
 ```
+
+右边的创建后会自动进入虚拟环境
 
 **基于某Python环境创建虚拟环境：**
 
