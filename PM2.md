@@ -183,8 +183,6 @@ production: {
     },
 ```
 
-
-
 ## 部署
 
 ```sh
@@ -199,6 +197,7 @@ $ pm2 deploy ecosystem.config.js production update
 # 常用命令
 
 - 查看运行中的列表 `pm2 ls`
+- 以主机最大核心数启动服务`pm2 start app.js -i max`
 - 生产配置文件模板`pm2 init`/`pm2 ecosystem`
 - 启动服务 `pm2 start <id|name>`
 - 停止服务 `pm2 stop 1`
