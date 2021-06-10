@@ -19,3 +19,15 @@ html{ font-size: 50px; }
 div{ height: 2rem; }
 ```
 
+## 利用冒泡捕获机制
+
+需求：给每一个访问的用户添加一个属性 `banned=true` ，此用户点击页面上的任何按钮或者元素都不可以相应原来的函数而是直接**alert**提示
+
+```javascript
+window.addEventListener('click', e => {
+    if (banned === 'true') {
+        e.stopPropagation()
+    }
+}, true)  // 捕获模式
+```
+
