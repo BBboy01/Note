@@ -28,6 +28,7 @@ window.addEventListener('click', e => {
     if (banned === 'true') {
         e.stopPropagation()
     }
-}, true)  // 捕获模式
+}, true)  // 捕获模式 默认为false
 ```
 
+事件委托的场景经常会使用到冒泡机制
