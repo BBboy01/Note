@@ -32,3 +32,19 @@ window.addEventListener('click', e => {
 ```
 
 事件委托的场景经常会使用到冒泡机制
+
+## Promise方法
+
+`Promise.all()`
+
+- 传入数组，数组里可以不全是`promise`对象
+- 返回按输入数组顺序的结果的数组，如果其中有一个promise rejected，则只返回一个rejected的值，但是其他的promise正常执行
+
+`Promise.race()`
+
+- 传入数组，数组里可以不全是`promise`对象
+- 返回输出数组中最先完成的promise的结果
+
+`Promise.resolve()`
+
+- 将传入的任何数据转换为`promise`对象
