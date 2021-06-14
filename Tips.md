@@ -48,3 +48,16 @@ window.addEventListener('click', e => {
 `Promise.resolve()`
 
 - 将传入的任何数据转换为`promise`对象
+
+## React中事件调用顺序
+
+- root originalCapture
+  - 父元素 reactCapture
+  - 子元素 reactCapture
+  - 父元素 originalCapture
+  - 子元素 originalCapture
+  - 子元素 originalBubble
+  - 父元素 originalBubble
+  - 子元素 reactBubble
+  - 父元素 reactBubble
+- root  originalBubble
