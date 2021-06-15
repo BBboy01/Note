@@ -61,3 +61,11 @@ window.addEventListener('click', e => {
   - 子元素 reactBubble
   - 父元素 reactBubble
 - root  originalBubble
+
+## 关于React为什么使用JSX来渲染
+
+JSX是`React.createElement`的语法糖
+
+- 约束性相比于模板更小
+- 更符合HTML书写习惯
+- 相比于模板不会引入太多的概念和语法
