@@ -913,7 +913,7 @@ app.get("/", (req,res)=>{
 
 - CSRF请求伪造的示意图：
 
-![CSRF攻击过程](./NodeJs.assets/CSRF攻击过程.png)
+![CSRF攻击过程](./assets/CSRF攻击过程.png)
 
 ### CSRF防护思路
 
@@ -1094,7 +1094,7 @@ console.log(str);
 
 ### JWT
 
-![jwt](./NodeJs.assets/jwt.png)
+![jwt](./assets/jwt.png)
 
 - 生成token值
 
@@ -1231,7 +1231,7 @@ res.setHeader("Access-Control-Allow-Origin", "*")
 
 - jsonp 就是前端利用 script 在页面不刷新的情况下和服务器进行交互一种技术。拿 json 格式的数据去填充一个函数，英语：json with paddding a function 简称：jsonp
 
-  ![跨域和jsonp](./NodeJs.assets/跨域和jsonp.png)
+  ![跨域和jsonp](./assets/跨域和jsonp.png)
 
 #### 普通模式使用
 
