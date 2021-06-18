@@ -69,3 +69,17 @@ JSX是`React.createElement`的语法糖
 - 约束性相比于模板更小
 - 更符合HTML书写习惯
 - 相比于模板不会引入太多的概念和语法
+
+## 关于setState是同步还是异步
+
+17版本以前：
+
+> react为同步模式，在事件处理函数里`setState`更新是**批量**的，或者说是**异步**
+>
+> 但是如果`setState`在`setTimeout`、`setInterval`、`addEventListener`等等中的回调中执行，更新就是同步的
+>
+> 如果想在`setTimeout`中实现批量更新，需要用`batchedUpdates`包裹才可以
+
+17版本以后：
+
+> ​	react为并发模式，无论在哪`setState`都是批量异步执行的
