@@ -74,6 +74,8 @@ JSX是`React.createElement`的语法糖
 
 ### 异步or同步
 
+当有更新时，React中会先创建一个`update`并通过`enqueueUpdate`将本次更新加入到当前`fiber`的更新链表中
+
 - 17版本以前：React中会根据当前执行的上下文来判断当前情况下是同步的还是异步的
 
 > react为同步模式，在事件处理函数里`setState`更新是**批量**的，或者说是**异步**
@@ -82,11 +84,71 @@ JSX是`React.createElement`的语法糖
 >
 > 如果想在`setTimeout`中实现批量更新，需要用`batchedUpdates`包裹才可以
 
-当有更新时，React中会先创建一个`update`并通过`enqueueUpdate`将本次更新加入到当前`fiber`的更新链表中
-
 - 17版本以后：
 
 > ​	react为并发模式，无论在哪`setState`都是批量异步执行的
+
+### 数据的合并
+
+当使用`setState`时，如果更新状态中只返回了需要修改的数据，不需要修改的数据也会保留，因为源码中使用的`Object.assign({}, this.state, { message: 'Thanks for your back' })`来更新状态
+
+```jsx
+this.state = {
+    message: 'Hello World',
+    name: 'coder'
+}
+
+changeState(){
+    this.setState({
+        message: 'Thanks for your back'
+    })
+}
+
+// 此时 state状态为{ message: 'Hello World', name: 'coder' }
+```
+
+### 本身的合并
+
+源码中，有一个`do while`循环，每一次从当前`fiber`的更新链表中取出下一个更新执行，即多次执行`getStateFromUpdate`，而此方法会拿到前一次的值和当前传入的值使用`Object.assign({}, prevState, partialState)`来进行合并，然而此时的`prevState`一直为`{ counter: 0 }`，即不论执行多少次都是在执行`Object.assign({}, {counter: 0 }, {counter: 1 })`
+
+```jsx
+this.state = {
+    counter: 0
+}
+
+changeState(){
+    this.setState({
+        counter: this.state.counter + 1
+    })
+    this.setState({
+        counter: this.state.counter + 1
+    })
+    this.setState({
+        counter: this.state.counter + 1
+    })
+}
+
+// 此时 state状态为{ counter: 1 }
+```
+
+当`setState`中的参数为`function`时，则会执行该方法，并传递前一次的值返回给`partialState`
+
+```jsx
+changeState(){
+    this.setState((prevState) => {
+        return {
+            counter: prevState.counter + 1
+        }
+    })
+    this.setState((prevState) => {
+        return {
+            counter: prevState.counter + 1
+        }
+    })
+}
+
+// 此时 state状态为{ counter: 2 }
+```
 
 ## React在diff时的情况
 
@@ -187,3 +249,7 @@ JSX是`React.createElement`的语法糖
   - `key`在当前队列中应该是唯一的
   - `key`不要使用随机数（随机数在下一次render时会重新生成一个数字，导致`key`全部变更进而全部修改）
   - 不要使用`index`作为`key`，这样是没有性能优化的
+
+## React更新流程
+
+`props/state`改变 -> `render`函数重新执行 -> 产生新的DOM树 -> 新旧DOM树进行`diff` -> 计算出差异进行更新 -> 更新到真实的DOM
