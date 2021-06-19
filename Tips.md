@@ -83,3 +83,103 @@ JSX是`React.createElement`的语法糖
 17版本以后：
 
 > ​	react为并发模式，无论在哪`setState`都是批量异步执行的
+
+## React在diff时的情况
+
+### 情况一：对比不同类型的元素
+
+- 当节点为不同的元素，React会拆卸原有的树，并且建立起新的树
+
+  - 当一个元素从`<a>`变成`<img>`，从`<Article>`变成`<Comment>`，或从`<Button>`变成`<div>`都会触发一个完整的重建流程
+  - 当卸载一颗树时，对应的DOM节点也会被销毁，组件实例将执行`componentWillUnmount()`方法
+  - 当建立一颗新的树时，对应的DOM节点会被创建以及插入到DOM中，组件实例将执行`componentWillMount()`方法，紧接着执行`componentDidMount()`方法
+
+- 例如如下代码
+
+  - React会销毁`Counter`组件并且重新装载一个新的组件，而不会对`Counter`进行复用
+
+  ```jsx
+  // from
+  <div>
+      <Counter />
+  </div>
+  
+  // to
+  <span>
+      <Counter />
+  </span>
+  ```
+
+### 情况二：对比同一类型的元素
+
+- 当对比两个相同类型的React元素时，React会保留DOM节点，仅比对及更新有改变的属性
+
+- 例如如下代码
+
+  - 通过比对这两个元素，React知道只需要修改DOM元素上的`className`属性
+
+  ```jsx
+  <div className="before" title="stuff" />
+  <div className="after" title="stuff" />
+  ```
+
+- 例如如下代码
+
+  - 当更新`style`属性时，React仅更新有所改变的属性
+  - 通过对比这两个元素，React知道只需要修改DOM元素上的`color`样式，无需修改`fontWeight`
+
+  ```jsx
+  <div style={{color: 'red', fontWeight: 'bold'}} />
+  <div style={{color: 'green', fontWeight: 'bold'}} />
+  ```
+
+- 如果时同类型的组件元素：
+
+  - 组件会保持不变，React会更新该组件的`props`，并调用`componentWillReceiveProps()`和`componentWillUpdate()`方法，接着调用`render()`方法，`diff`算法将在之前的结果以及更新的结果中进行递归
+
+### 情况三：对子节点进行递归
+
+- 在默认条件下，当递归DOM节点的子元素时，React会同时遍历两个子元素列表；当产生差异时，生成一个`mutation`
+
+  > 前面两个比较是完全相同的，所以不会产生`mutation`，最后一个比较，产生一个`mutation`，将其插入到新的DOM树中即可
+
+  ```jsx
+  <ul>
+  	<li>first</li>
+      <li>second</li>
+  </ul>
+  
+  <ul>
+  	<li>first</li>
+      <li>second</li>
+      <li>third</li>
+  </ul>
+  ```
+
+- 但是如果是在中间插入一条数据
+
+  > React会对每一个子元素产生一个`mutation`，而不是保持`<li>1</li>`和`<li>2</li>`不变，这种低效的比较方式会带来一定的性能问题
+
+  ```jsx
+  <ul>
+  	<li>1</li>
+      <li>2</li>
+  </ul>
+  
+  <ul>
+      <li>3</li>
+  	<li>1</li>
+      <li>2</li>
+  </ul>
+  ```
+
+#### keys的优化
+
+1. 方式一：在最后位置插入数据，这种情况有无`key`意义不大
+2. 方式二：在前面插入数据，在没有`key`的情况下所有的`li`都需要进行修改
+
+- 当子元素拥有`key`时，React使用`key`来匹配原有树上的子元素以及最新树上的子元素
+- `key`的注意事项：
+  - `key`在当前队列中应该是唯一的
+  - `key`不要使用随机数（随机数在下一次render时会重新生成一个数字，导致`key`全部变更进而全部修改）
+  - 不要使用`index`作为`key`，这样是没有性能优化的
