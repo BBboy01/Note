@@ -239,7 +239,7 @@ changeState(){
   </ul>
   ```
 
-#### keys的优化
+**keys的优化**
 
 1. 方式一：在最后位置插入数据，这种情况有无`key`意义不大
 2. 方式二：在前面插入数据，在没有`key`的情况下所有的`li`都需要进行修改
@@ -250,6 +250,14 @@ changeState(){
   - `key`不要使用随机数（随机数在下一次render时会重新生成一个数字，导致`key`全部变更进而全部修改）
   - 不要使用`index`作为`key`，这样是没有性能优化的
 
-## React更新流程
+## React更新
 
-`props/state`改变 -> `render`函数重新执行 -> 产生新的DOM树 -> 新旧DOM树进行`diff` -> 计算出差异进行更新 -> 更新到真实的DOM
+- 流程 ：`props/state`改变 -> `render`函数重新执行 -> 产生新的DOM树 -> 新旧DOM树进行`diff` -> 计算出差异进行更新 -> 更新到真实的DOM
+
+- 问题：父组件状态改变，子组件尽管并未依赖父组件所修改的状态，但是却也跟着重新执行`render`
+- 解决方法（类组件中）：
+  - React源码中会检查是否实现了`shouldComponentUpdate`函数，若未实现则默认返回`true`，即需要更新，而在子组件中实现`shouldComponentUpdate`函数则会调用该函数，该函数需返回`boolean`值，`true`表示跟着父组件一起更新，`false`表示不更新。
+  - 而子组件在实现的时候不继承`React.Component`，而是继承`React.PureComponent`时，React中`PureComponent`会绑定一个类属性`isPureReactComponent = true`，因此在检查的时候会执行`shallowEqual`对`oldProps`、`newProps`和`oldState`、`newState`进行浅层比较，如果相等则返回`false`，即不更新。不使用深层比较是为了性能考虑
+- 函数组件中：
+  - 使用`memo`包裹该函数组件
+
