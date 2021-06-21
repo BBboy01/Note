@@ -105,3 +105,10 @@ function App() {
 老规矩，第二个参数传入一个数组，数组中的每一项一旦值或者引用发生改变，useCallback 就会重新返回一个新的记忆函数提供给后面进行渲染。
 
 这样只要子组件继承了 PureComponent 或者使用 React.memo 就可以有效避免不必要的 VDOM 渲染。
+
+## ref的类型
+
+- ref的值根据节点的类型而有所不同：
+  - 当ref属性用于HTML元素时，构造函数中使用React.creatdRef()创建的ref接收底层DOM元素作为其current属性
+  - 当ref属性用于自定义class组件时，ref对象接收组件的挂载实例作为其current属性
+  - 不能在函数组件上使用ref，因为他们没有实例，需要通过React.forwardRef，或者通过hooks
