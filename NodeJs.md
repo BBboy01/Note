@@ -78,6 +78,7 @@ const app = express()
 // 解析 application/json
 app.use(express.json()); 
 // 解析 application/x-www-form-urlencoded
+// app.use(express.urlencoded({true}));  表示使用第三方qs模块解析 不使用内置的queryString
 app.use(express.urlencoded());
 
 app.post('/', (req, res) => {
