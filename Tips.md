@@ -261,3 +261,8 @@ changeState(){
 - 函数组件中：
   - 使用`memo`包裹该函数组件
 
+## express和Koa处理异步
+
+express中`next`的实现只返回了一个普通函数，所以对于获取异步请求结果并不方便
+
+Koa中`next`的实现是返回`Promise`的，所以可以`await next()`来等待异步调用有结果了再往下执行
