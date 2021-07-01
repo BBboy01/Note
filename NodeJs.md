@@ -1315,6 +1315,8 @@ app.use(cors())
 
 # Koa
 
+> 当response.status(ctx.status)未设置时，Koa会自动将状态设置为**200**或**204(成功但内容为空)**
+
 ## hello world代码
 
 - Koa 应用程序是一个包含`一组中间件函数的对象`，它是按照类似堆栈的方式组织和执行的。
@@ -1326,6 +1328,24 @@ const app = new Koa();
 app.use(async ctx => {
   ctx.body = 'Hello World';
 });
+```
+
+## 错误处理
+
+```js
+app.use(async ctx => {
+  	const isLogin = false
+    if (!isLogin) {
+        ctx.app.emmit('error', new Error('you have not logged in'), ctx)
+    	return
+    }
+    ctx.body = 'Hello World';
+});
+
+app.on('error', (err, ctx) => {
+    ctx.status = 401
+    ctx.body = err.message
+})
 ```
 
 ## 路由中间件
@@ -1357,7 +1377,7 @@ router.get("/", function (ctx, next){
 app.use(router.routes());
 ```
 
-## 路由钩子
+### 路由钩子
 
 ```js
 const Koa = require("koa");
@@ -1373,13 +1393,23 @@ async function test(ctx, next) {
   console.log("jojo");
 }
 
+koaRouter.get('/', ctx => {
+    ctx.body = {msg: 'ok'}
+})
+
 app.use(test);
 app.use(router.routes());
-app.use(koaRouter.allowedMethods()); // according to 'ctx.status' to set response header of 'response'
+
+// 判断一个method是否支持
+/**
+* 当请求get 为正常请求
+* 当请求put、delete、patch会报错：Method Not Allowed，状态码：405
+* 当请求link、copy、lock会报错：Not Implemented，状态码：501
+**/
+app.use(koaRouter.allowedMethods());
+
 app.use(bodyParser);
 ```
-
-
 
 ## 获取请求参数（GET参数）
 
