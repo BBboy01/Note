@@ -1304,9 +1304,6 @@ app.get("/get_data",(req, res)=>{
     res.setHeader("Access-Control-Allow-Origin", "*")
     res.send({name:"node", age:"11"})
 })
-app.listen(3001, ()=>{
-    console.log(`服务器已经启动，端口为：3001`);
-})
 ```
 
 ### 使用cors模块
@@ -1328,10 +1325,6 @@ const app = new Koa();
 
 app.use(async ctx => {
   ctx.body = 'Hello World';
-});
-
-app.listen(3000, ()=>{
-    console.log("server is running at port 3000");
 });
 ```
 
@@ -1362,10 +1355,6 @@ router.get("/", function (ctx, next){
 });
 
 app.use(router.routes());
-
-app.listen(3000, ()=>{
-    console.log("server is running at port 3000");
-});
 ```
 
 ## 路由钩子
@@ -1388,10 +1377,6 @@ app.use(test);
 app.use(router.routes());
 app.use(koaRouter.allowedMethods()); // according to 'ctx.status' to set response header of 'response'
 app.use(bodyParser);
-
-app.listen(3000, () => {
-  console.log(`server runs in http://localhost:3000/`);
-});
 ```
 
 
@@ -1407,67 +1392,67 @@ app.use(async (ctx) => {
     console.log(ctx.query);  //获取解析的查询字符串对象
     console.log(ctx.querystring); //根据 ? 获取原始查询字符串
     console.log(ctx.headers);//获取请求头对象
+    console.log(ctx.params);  // 根据动态路由获取参数
     ctx.body = ctx.url;
-});
-
-app.listen(3000, () => {
-    console.log('server is starting at port 3000');
 });
 ```
 
 ## 获取请求体（POST参数）
 
-- 安装 koa-bodyparser
+### 解析`json`、`urlencoded`数据
 
-- 使用
+- 安装 `koa-bodyparser`
 
-```js
-const bodyParser = require('koa-bodyparser');
-const app = new Koa();
-app.use(bodyParser());
-
-router.post("/", function (ctx){
-    let post_params = ctx.request.body;  //ctx.request.body;这里的request不能省略
-    ctx.body = post_params
-});
-```
-
-- 完整
 
 ```js
-// 获取post请求参数
-const Koa = require('koa');
-const path = require('path');
-const Router = require('koa-router');
-const render = require('koa-art-template');
-const bodyParser = require('koa-bodyparser');
 const app = new Koa();
+const bodyParser = require('koa-bodyparser');
+
 app.use(bodyParser());
-let router = new Router();
 
-render(app, {
-  root: path.join(__dirname, 'views'),
-  extname: '.html',
-  debug: process.env.NODE_ENV !== 'production'
-});
-
-router.get("/", function (ctx){
-    ctx.render("login")
-});
 router.post("/", function (ctx){
     let post_params = ctx.request.body;
     ctx.body = post_params
 });
-app.use(router.routes());
+```
 
-app.listen(3000, ()=>{
-    console.log("server is running at port 3000");
+### 解析`form-data`数据(不包含文件)
+
+- 安装`koa-multer`
+
+```js
+const app = new Koa();
+const multer = require('koa-multer');
+const Router = require('koa-router');
+
+const upload = multer();
+const router = new Router({prefix: '/upload'});
+
+// app.use(upload.any());  路由可以添加多个中间件 最好写到单独的路由中
+
+router.post("/", upload.any(), (ctx, next) => {
+    let formData = ctx.req.body;  // 此处数据需在ctx.req中获取而不在ctx.request
+    ctx.body = formData
 });
 ```
 
-## 获取文件
+### 获取`form-data`中的文件
 
-koa处理 post 请求使用的是 `koa-bodyparser`，同时如果是图片上传使用的是 `koa-multer`。
+```js
+const app = new Koa();
+const multer = require('koa-multer');
+const Router = require('koa-router');
+
+const upload = multer({
+    dest: './uploads/'  // 文件上传到的路径 如果没有该文件夹会自动创建
+});
+const router = new Router({prefix: '/upload'});
+
+router.post("/", upload.single('avatar'), (ctx, next) => {
+    let fileData = ctx.req.file;
+    ctx.body = {msg: 'upload success'}
+});
+```
 
 这两者的组合没什么问题，不过 `koa-multer` 和 `koa-route`（注意不是 `koa-router`） 存在不兼容的问题。
 
