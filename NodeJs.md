@@ -1785,6 +1785,8 @@ app.listen(3000, ()=>{
 
 ## 操作数据库
 
+或使用`sequelize`
+
 ```js
 // 链接数据库
 const Koa = require('koa');
