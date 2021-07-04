@@ -1177,8 +1177,8 @@ axios.interceptors.request.use( config => {
 - 使用openssl生成公、私钥：
 
 ```bash
-openssl
-genrsa -out pirvate.key 1024
+openssl  # windows下使用Git Bash来使用openssl
+genrsa -out prvate.key 1024
 rsa -in private.key -pubout -out public.key
 ```
 
