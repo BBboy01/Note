@@ -1178,7 +1178,7 @@ axios.interceptors.request.use( config => {
 
 ```bash
 openssl  # windows下使用Git Bash来使用openssl
-genrsa -out prvate.key 1024
+genrsa -out private.key 1024
 rsa -in private.key -pubout -out public.key
 ```
 
@@ -1848,29 +1848,34 @@ app.listen(3000, ()=>{
 
 ## 操作数据库
 
-或使用`sequelize`
+或使用`sequelize`ORM操作
 
 ```js
-// 链接数据库
-const Koa = require('koa');
-const Router = require('koa-router');
-const handleDB = require('./db/handleDB');
-const app = new Koa();
+// database.js
+const mysql = require("mysql2");
 
-let router = new Router();
+const config = require("./config");
 
-router.get("/", async function (ctx){
-     
-    let ret = await handleDB(ctx.res, "info_category", "find", "出错")
-    ctx.body = ret
-
+const connections = mysql.createPool({
+  host: config.MYSQL_HOST,
+  port: config.MYSQL_PORT,
+  database: config.MYSQL_DATABASE,
+  user: config.MYSQL_USER,
+  password: config.MYSQL_PASSWORD,
 });
 
-app.use(router.routes());
+module.exports = connections.promise();
 
-app.listen(3000, ()=>{
-    console.log("server is running at port 3000");
-});
+
+// service.js
+const connection = require("../app/database");
+
+async checkResource(tableName, momentId, userId) {
+    const statement = `SELECT * FROM ${tableName} WHERE id = ? AND user_id = ?;`;
+    const [result] = await connection.execute(statement, [momentId, userId]);
+
+    return result.length === 0 ? false : true;
+}
 ```
 
 ## 模板引擎使用
