@@ -9,6 +9,10 @@
 | npm update --save            | yarn upgrade             |
 | npm install -g @vue/cli      | yarn global add @vue/cli |
 
+# 相对路径坑爹Tip
+
+在项目中的任何一个地方的相对路径，都是相对于process.cwd()，即在哪一个文件夹启动的项目，process.cwd()就是哪个目录
+
 # Express
 
 ## 简易的搭建后台服务
@@ -1097,6 +1101,12 @@ console.log(str);
 
 ![jwt](./assets/jwt.png)
 
+#### 对称签名加密
+
+- 缺点：在分布式系统中，每一个子系统都需要获取到密钥，在拿到密钥后这个子系统既可以发布`Token`也可以验证`Token`，但是对于一些资源服务器来说，他们只需要有验证令牌的能力就足够了
+
+---
+
 - 生成token值
 
 ```js
@@ -1116,9 +1126,9 @@ const token = jwt.sign({id:1,username:"zhangsan"},salt,{expiresIn: 60 * 60 * 2})
 - 验证token
 
 ```js
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ6aGFuZ3NhbiIsImlhdCI6MTU4NjEyNTUwMywiZXhwIjoxNTg2MTMyNzAzfQ.Uwx-EzPq2c9oDJxfs0nCrWLAcTS89HxPBqTUbx91gwY"
+const token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ6aGFuZ3NhbiIsImlhdCI6MTU4NjEyNTUwMywiZXhwIjoxNTg2MTMyNzAzfQ.Uwx-EzPq2c9oDJxfs0nCrWLAcTS89HxPBqTUbx91gwY"
 try{
-    let payload  = jwt.verify(token.split(' ')[1], salt);   //获取token中的数据(用户信息)
+    let payload  = jwt.verify(token.replace("Bearer ", ""), salt);   //获取token中的数据(用户信息)
 }catch(e){
     console.log("token已经过期")
 }
@@ -1139,7 +1149,9 @@ router.get('/getUser-token', jwtAuth({ salt }), async ctx => {
 })
 ```
 
-- 前端
+- 前端发送
+
+![image-20210704155332932](NodeJsImages/image-20210704155332932.png)
 
 ```js
 axios.interceptors.request.use( config => {
@@ -1153,6 +1165,51 @@ axios.interceptors.request.use( config => {
     return config
 }, err => {
     return Promise.reject(err)
+})
+```
+
+#### 非对称签名加密
+
+- 加密方法：`RS256`
+- 私钥：用于发布令牌
+- 公钥：用于验证令牌
+
+- 使用openssl生成公、私钥：
+
+```bash
+openssl
+genrsa -out pirvate.key 1024
+rsa -in private.key -pubout -out public.key
+```
+
+- 实例
+
+```js
+const jwt = require('jsonwebtoken');
+const fs = require('fs')
+
+const PRIVATE_KEY = fs.readFileSync('./private.key')
+const PUBLIC_KEY = fs.readFileSync('./public.key')
+
+// 签发token
+router.post('/grant', ctx => {
+    const user = {id: 10, name: 'dio'}
+    const token = jwt.sign(user, PRIVATE_KEY, {
+        expiresIn: 10,
+        algorithm: "RS256"
+    })
+})
+
+// 验证token
+router.post('/verify', ctx => {
+    const authorization = ctx.headers.authorization
+    const token = authorization.replace("Bearer ", "")
+    try{
+    	const result  = jwt.verify(token, PUBLIC_KEY, { algorithm: ["RS256"] });
+        ctx.body = result
+    } catch (error) {
+        ctx.body = "无效或过期的token"
+    }
 })
 ```
 
@@ -1699,7 +1756,13 @@ router.get('/getUser', require('../middleware/auth.js'), async ctx => {
 })
 ```
 
+## cookie和session的缺点
 
+- Cookie会被附加在每个HTTP请求中，所以无形中增加了流量（事实上某些请求时不需要的）
+- Cookie是明文传输，所以存在安全性问题
+- Cookie的大小限制是4KB，对于复杂的需求来说是不够的
+- 对于浏览器以外的其他客户端（比如IOS和Android）访问服务器时不会自动携带cookie和session，必须手动的设置
+- 对于分布式系统和服务器集群中难以保证其他系统也可以正确的解析session
 
 ## GitHub Oauth2 授权登录
 
