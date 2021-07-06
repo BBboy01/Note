@@ -1546,15 +1546,20 @@ const upload = multer({
 });
 const router = new Router({prefix: '/upload'});
 
-router.post("/", upload.single('avatar'), (ctx, next) => {
+router.post("/avatar", upload.single('avatar'), (ctx, next) => {
     let fileData = ctx.req.file;
+    ctx.body = {msg: 'upload success'}
+});
+
+router.post("/picture", upload.array('picture', 9), (ctx, next) => {
+    let fileData = ctx.req.files;
     ctx.body = {msg: 'upload success'}
 });
 ```
 
 这两者的组合没什么问题，不过 `koa-multer` 和 `koa-route`（注意不是 `koa-router`） 存在不兼容的问题。
 
-因此使用`koa-body`代替
+因此使用当使用`koa-route`时用`koa-body`代替（**其实也用不上**）
 
 - app.js
 
@@ -1628,6 +1633,21 @@ router.post('/',async (ctx)=>{
 | name             | 文件的原始名称   |
 | type             | 文件类型         |
 | lastModifiedDate | 上次更新的时间   |
+
+### Resize图片
+
+- 需要用到`jimp`
+
+```js
+const path = require("path");
+const Jimp = require("jimp");
+
+Jimp.read(file.path).then((image) => {
+    image.resize(1200, Jimp.AUTO).write(`${destPath}-large`);
+    image.resize(640, Jimp.AUTO).write(`${destPath}-middle`);
+    image.resize(320, Jimp.AUTO).write(`${destPath}-small`);
+});
+```
 
 ## 会话cookie
 
