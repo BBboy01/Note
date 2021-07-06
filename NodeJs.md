@@ -1374,18 +1374,29 @@ app.use(cors())
 
 > 当response.status(ctx.status)未设置时，Koa会自动将状态设置为**200**或**204(成功但内容为空)**
 
-## hello world代码
-
 - Koa 应用程序是一个包含`一组中间件函数的对象`，它是按照类似堆栈的方式组织和执行的。
 
-```js
-const Koa = require('koa');
-const app = new Koa();
+## 目录结构
 
-app.use(async ctx => {
-  ctx.body = 'Hello World';
-});
+```js
+└─src
+
+  ├─app      // 服务、数据库、错误处理等的一些配置
+
+  ├─constants   // 全局中需要用到的常量
+
+  ├─controller  // 处理路由匹配后的主要逻辑
+
+  ├─middleware  // 路由中间件，对数据进行处理后交给controller
+
+  ├─router    // 路由
+
+  ├─service    // 操作数据库
+
+  └─utils     // 一些工具方法
 ```
+
+- 对于一些隐私的值（例如密码、端口号等），使用`dotenv`临时存放于环境变量中，声明于**.env**文件中
 
 ## 错误处理
 
