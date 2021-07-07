@@ -1151,7 +1151,7 @@ router.get('/getUser-token', jwtAuth({ salt }), async ctx => {
 
 - 前端发送
 
-![image-20210704155332932](NodeJsImages/image-20210704155332932.png)
+![image-20210704155332932](assets/image-20210704155332932.png)
 
 ```js
 axios.interceptors.request.use( config => {

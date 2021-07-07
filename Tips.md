@@ -19,6 +19,30 @@ html{ font-size: 50px; }
 div{ height: 2rem; }
 ```
 
+## flex布局中的参数
+
+- flex为`flex-grow、flex-shrink、flex-basic`的缩写，默认值为 0 1 auto
+  - flex: auto (1 1 auto)
+  - flex: 0 (0 0 0)
+  - flex: 1 (1 1 auto)
+  - flex: none (0 0 auto)
+
+- flex-grow
+  - 当父元素flex方向为row时子元素没占满父元素宽度时
+    - flex-grow默认为0，表示该子元素不自适应增长宽度使其占有剩余宽度
+    - flex-grow为1，表示该子元素宽度自适应占据剩余宽度
+    - 计算规则：所有子元素中flex-grow的值加起来表示剩余宽度被分多少份，子元素自身的flex-grow的值表示占据的份数
+- flex-shrink
+  - 当父元素flex方向为row时子元素占满父元素宽度或累加宽度超过父元素宽度时
+    - flex-shrink默认为1，表示该子元素自适应缩减宽度
+    - flex-shrink为0，表示该子元素保持自身宽度
+    - 计算规则：父元素宽度 - flex-shrink为0的元素 = X ，flex-shrink不为0的元素的原本总宽度 Y ， flex-shrink不为0的元素的个数为要压缩的份数 M , flex-shrink不为0的元素的自身的宽度为 C ，Y - X = Z为需要shrink沾满的宽度，C - Z / M = L 为此时该元素的宽度
+- flex-auto
+  - 为auto时计算该子元素的宽度
+  - 为0时不计算该子元素的宽度
+- order
+  - 表示该元素的权重，值越小权重越高，排列时权重大的在前面
+
 ## 利用冒泡捕获机制
 
 需求：给每一个访问的用户添加一个属性 `banned=true` ，此用户点击页面上的任何按钮或者元素都不可以相应原来的函数而是直接**alert**提示
