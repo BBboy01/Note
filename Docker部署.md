@@ -29,6 +29,7 @@
     - 使用`docker volume inspect monkey`查看该容器的详细信息，其中`"Mountpoint"`为该卷挂载在宿主机上的位置。
     - 当相关容器删除后，该卷依旧存在
   - `-e "NAME=VALUE"` 为容器添加环境变量
+  - `-h 名字` 指定进入容器时显示的主机名
 - 启动容器
   - `docker run 容器名称`
   - `docker run -it 容器名称 初始命令`
@@ -47,13 +48,21 @@
 
 docker容器内的第一个进程（初始命令）必须一直处于前台运行的状态，否则这个容器就会出现退出状态
 
----
+## 重启docker容器
 
+当docker重启之后没有设置重启的容器全部都会退出
 
+- 重启指定容器`docker run -d --restart=always nginx`
+
+- 设置所有容器都自动重启`vim /etc/docker/daemon.json` 但是当容器重新启动后容器虽然启动着，**但是关闭docker的时候容器也一直处于启动状态，所以不建议使用**
+
+  ```shell
+  {
+    "live-restore": true
+  }
+  ```
 
 ## 小案例
-
----
 
 将宿主机80端口映射到容器80，81端口映射到容器81，并用自己的配置启动nginx
 
@@ -130,3 +139,72 @@ tail -F /var/log/httpd/access_log
   - ENV 环境变量
   - ENTRYPOINT 容器启动后执行的命令（无法被替换），并把启动时指定的自己指定的命令作为其参数
 
+## 文件的分层
+
+- docker在生成新的镜像的时候是分层生成的，分层则是根据之前对镜像进行文件大小变化的记录进行分层，无文件大小变化的操作作为容器的属性不在分层中，使用`docker history 镜像id或名称`查看历史对该镜像的所有操作。
+
+- 分层是除了最原始的镜像，后面添加的镜像都会有一个parent属性标记着父层的目录
+
+- 分层后的镜像都是复用上一次镜像内容，因此只保留改变的数据，当运行该镜像为容器的时候，则会merge为一个整体
+
+- 分层的好处便是可以复用，节省磁盘空间，相同的内容只需加载一份到内存里。
+
+- 更改dockerfile时尽量在最后加新内容，这样可以尽可能少的改变分层的结构，没被破坏的地方直接走上一次打包镜像的缓存
+
+## 容器的互联（--link 单向）
+
+`docker run -d --name WEB-p 80:80 nginx`
+
+`docker run -it --link 容器名称:别名 centos-ssh /bin/bash`
+
+`ping WEB`
+
+实际上是在后面的容器的`/etc/hosts`文件中添加了一条`--link`后面的容器的 ip ，可以通过别名、容器名称、容器id来快捷连接
+
+## 上传镜像到私有仓库
+
+如果上传或下载的私有仓库地址不是HTTPS的，则需要更改`/etc/docker/daemon.json`，添加
+
+```shell
+{
+	"insecure-registries": ["10.0.0.11:5000"]
+}
+```
+
+之后`systemctl restart docker`
+
+---
+
+- 创建私有仓库(10.0.0.11)
+
+  - `docker run -d -p 5000:5000 --restart=always --name=registry -v /opt/myregistry:/var/lib/registry registry`
+
+- 给镜像打标签
+
+  - `docker tag nginx:v2 10.0.0.11:5000/nginx:v2`
+
+- 上传镜像
+
+  - `docker push 10.0.0.11:5000/nginx:v2`
+
+- 拉取镜像
+
+  - `docker pull 10.0.0.11:5000/nginx:v2`
+
+- 创建带basic认证的私有仓库
+
+  - ```shell
+    yum install httpd-tools -y
+    mkdir /opt/registry-var/auth/ -p
+    htpasswd -Bbn oldboy 123456 » /opt/registry-var/auth/htpasswd
+    
+    docker run -d -p 5000:5000 -v /opt/registry-var/auth/:/auth/ -v /opt/myregistry:/var/lib/registry -e "REGISTRY_AUTH=htpasswd" -e "REGISTRY_AUTH_HTPASSWD_REALH=Registry Realm" -e "REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd" registry
+    ```
+    登录`docker login -uoldboy -p123456 10.0.0.11:5000`
+
+## Docker网络类型
+
+- none 不为容器配置任何网络功能  `--network none`
+- container 与另一个运行中的容器共享主机名、IP、端口 `--network container:容器id`
+- host 与宿主机共享主机名、IP、端口 `--network host`
+- bridge （默认）桥接的方式通过NAT转换使用网络功能
