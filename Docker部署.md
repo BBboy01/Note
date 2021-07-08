@@ -21,6 +21,7 @@
 - 创建并运行一个容器`docker run -d -p 80:456 --name myNginx nginx:latest /bin/sh`
   - `-d` 放在后台 `-it` 分配交互式的终端
   - `-p 宿主机端口：容器端口` 将容器端口映射到宿主机上
+  - `-P 容器端口` 将容器端口随机映射到宿主机上的某一个端口
   - `--name 容器名称` 指定运行的容器名称
   - `/bin/sh` 覆盖容器的初始命令
   - `-v 宿主机目录：容器目录 / 宿主机文件：容器文件` 将宿主机目录挂载到容器中（目录不存在则创建，参数类型要一样）
@@ -45,6 +46,7 @@
   - `-f` 连运行中的容器也一同删除
 - 批量删除容器 docker rm -f  &#96; docker ps -a -q &#96;
 - 查看容器启动后的输出内容（排错）`docker logs 容器id或名称`
+- 查看容器的端口映射`docker port 容器id`
 
 docker容器内的第一个进程（初始命令）必须一直处于前台运行的状态，否则这个容器就会出现退出状态
 
@@ -56,7 +58,7 @@ docker容器内的第一个进程（初始命令）必须一直处于前台运�
 
 - 设置所有容器都自动重启`vim /etc/docker/daemon.json` 但是当容器重新启动后容器虽然启动着，**但是关闭docker的时候容器也一直处于启动状态，所以不建议使用**
 
-  ```shell
+  ```json
   {
     "live-restore": true
   }
@@ -85,7 +87,7 @@ chown -R apache:apache .
 
 改为Dockerfile
 
-```shell
+```dockerfile
 FROM centos:6.9
 RUN curl -o /etc/yum.repos.d/CentOS-Base.repo https://static.lty.fun/%E5%85%B6%E4%BB%96%E8%B5%84%E6%BA%90/SourcesList/Centos-6-Vault-Aliyun.repo
 RUN yum install php unzip php-gd php-mbstring -y
@@ -165,7 +167,7 @@ tail -F /var/log/httpd/access_log
 
 如果上传或下载的私有仓库地址不是HTTPS的，则需要更改`/etc/docker/daemon.json`，添加
 
-```shell
+```json
 {
 	"insecure-registries": ["10.0.0.11:5000"]
 }
@@ -204,7 +206,95 @@ tail -F /var/log/httpd/access_log
 
 ## Docker网络类型
 
+查看docker启动的网段`docker network ls`
+
+查看网段详情`docker network inspect 网段名称或id`，里面会显示这个网段中每个容器的IP信息
+
 - none 不为容器配置任何网络功能  `--network none`
 - container 与另一个运行中的容器共享主机名、IP、端口 `--network container:容器id`
 - host 与宿主机共享主机名、IP、端口 `--network host`
 - bridge （默认）桥接的方式通过NAT转换使用网络功能
+
+## docker-compose批量启动容器
+
+- 安装
+
+  - `pip install docker-compose`
+
+- 编写`docker-compose.yaml`
+
+  ```shell
+  version: '3'
+  
+  services:
+    db:
+      image: mysql:5.7
+      volumes:
+        - db_data:/var/lib/mysql
+      restart: always
+      environment:
+        MYSQL_ROOT_PASSWORD: somewordpress
+        MYSQL_DATABASE: wordpress
+        MYSQL_USER: wordpress
+        MYSQL_PASSWORD: wordpress
+  
+    wordpress:
+      depends_on:
+        - db
+      image: wordpress:latest
+      volumes:
+        - web_data:/var/www/html
+      ports:
+        - "80"
+      restart: always
+      environment:
+        WORDPRESS_DB_HOST: db:3306
+        WORDPRESS_DB_USER: wordpress
+        WORDPRESS_DB_PASSWORD: wordpress
+    volumes:
+      db_data:
+      web_data:
+  ```
+
+- 启动`docker-compose up`
+
+- 后台启动`docker-compose up -d`
+
+- 某个容器启动多个`docker-compose up -d --scale wordpress=3`
+
+- 启动后的容器名称为：`当前所处的文件夹名称 + services中起的名称`，如果启动多个则会在后面拼上`_1、_2`
+
+- 启动后会为这些批量创建的容器创建一个docker网段
+
+此时使用`netstat -lntup`查看占用的端口便会看到3个wordpress服务占用了宿主机3个随机的端口映射到wordpress的80口上
+
+![image-20210708131427253](assets/image-20210708131427253.png)
+
+此时便可以使用**Nginx**做负载均衡`vim /etc/nginx/nginx.conf`
+
+```nginx
+worker_processes  1;
+events {
+    worker_connections  1024;
+}
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+    upstream wordpress {
+        server 10.0.0.11:32768;
+        server 10.0.0.11:32769;
+        server 10.0.0.11:32770;
+    }
+    server {
+        listen       80;
+        server_name  localhost;
+        location / {
+            proxy_pass http://wordpress;
+            proxy_set_header Host $host;
+        }
+    }
+}
+```
+
