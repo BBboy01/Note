@@ -155,6 +155,8 @@ tail -F /var/log/httpd/access_log
 
 ## 容器的互联（--link 单向）
 
+docker中每建立一个容器都会创建两个虚拟网卡，一个为容器的，一个为桥接到`docker0`的，因此主机可以`ping`通该容器。多个容器也都会通过桥接`docker0`实现互相访问，但是只能通过ip地址进行访问。而使用`--link`可以使用名称来实现容器之间的访问
+
 `docker run -d --name WEB-p 80:80 nginx`
 
 `docker run -it --link 容器名称:别名 centos-ssh /bin/bash`
@@ -214,6 +216,26 @@ tail -F /var/log/httpd/access_log
 - container 与另一个运行中的容器共享主机名、IP、端口 `--network container:容器id`
 - host 与宿主机共享主机名、IP、端口 `--network host`
 - bridge （默认）桥接的方式通过NAT转换使用网络功能
+
+## 自己创建网络
+
+- `docekr network create --dirver bridge --subnet 192.168.0.0/16 --gateway 192.168.0.1 myNet`
+
+- 在自定义的网络下启动容器
+
+  - ```shell
+    docker run -d -P --name tomcat-net-01 --net myNet tomcat
+    docker run -d -P --name tomcat-net-02 --net myNet tomcat
+    ```
+
+- 此时`docker network inspect myNet`会出现tomcat-net-01和tomcat-net-02的信息
+
+- 并且此时两个容器**可以使用名称互相ping通**，推荐在不同的集群中使用不同的网络，保证集群是安全和健康的
+
+## 不同网络间网络的连通
+
+- `docker connect myNet tomcat01`
+- 之后docker便会将tomcat01放到myNet网络下
 
 ## docker-compose批量启动容器
 
