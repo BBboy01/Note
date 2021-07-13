@@ -1,3 +1,5 @@
+创建typescript类型的应用`create-react-app project-name --example typescript`
+
 ## HOC(高阶组件)
 
 Higher-Order Components就是一个函数，传给它一个组件，它返回一个新的组件。
