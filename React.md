@@ -114,3 +114,7 @@ function App() {
   - 当ref属性用于HTML元素时，构造函数中使用React.creatdRef()创建的ref接收底层DOM元素作为其current属性
   - 当ref属性用于自定义class组件时，ref对象接收组件的挂载实例作为其current属性
   - 不能在函数组件上使用ref，因为他们没有实例，需要通过React.forwardRef，或者通过hooks
+
+## 对props中的children中所有child进行处理
+
+父组件props中的children并非是数组，因此要是想要对children进行检查处理的时候可以使用`React.Children.map(children, (child, index) => { return child })`来对子组件进行检查
