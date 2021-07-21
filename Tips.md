@@ -294,3 +294,19 @@ Koa中`next`的实现是返回`Promise`的，所以可以`await next()`来等待
 ## display为none时的样式
 
 当display为none时为元素添加的所有样式都不会生效，因此通过display:none控制元素动画时当元素消失的时候不会执行相应的动画，建议通过元素的取消挂载来实现消失时的动画。并且animation属性不会继承，如果不想覆盖，可以在需要添加元素外包裹一层为其添加动画
+
+## 前端项目在git操作之前执行命令
+
+需要使用到`Husky`，安装`yarn add husky`
+
+```json
+// package.json
+
+"husky": {
+    "hooks": {
+      "pre-commit": "yarn test:nowatch && yarn lint",
+      "pre-push": "yarn test:nowatch && yarn lint"
+    }
+}
+```
+
