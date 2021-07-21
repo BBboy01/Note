@@ -47,6 +47,7 @@
 - 批量删除容器 docker rm -f  &#96; docker ps -a -q &#96;
 - 查看容器启动后的输出内容（排错）`docker logs 容器id或名称`
 - 查看容器的端口映射`docker port 容器id`
+- 将本地的文件拷贝到容器中`docker cp 本地文件 容器名称:目录`
 
 docker容器内的第一个进程（初始命令）必须一直处于前台运行的状态，否则这个容器就会出现退出状态
 
@@ -134,12 +135,13 @@ tail -F /var/log/httpd/access_log
   - ADD 将宿主机上的某个文件copy到容器里(tar 自动解压) 
   - WORKDIR 设置当前工作目录，不设置默认是`/`开始
   - VOLUME 设置卷，挂载宿主机目录
-  - EXPOSE 指定对外的端口
+  - EXPOSE 声明容器运行的服务端口
   - CMD 指定容器启动后要干的事情（容易被替换）
 - Dockerfile其他指令
   - COPY 与ADD相同但不会自动解压tar
   - ENV 环境变量
   - ENTRYPOINT 容器启动后执行的命令（无法被替换），并把启动时指定的自己指定的命令作为其参数
+- 构建的时候可以对一些缓存进行清理来减少构建后的镜像的大小`yum clean all && rm -rf /var/cache/yum/*`
 
 ## 文件的分层
 
