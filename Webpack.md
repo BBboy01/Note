@@ -433,3 +433,97 @@ module.export = {
 }
 ```
 
+# 配置`webpack-dev-serve`为热更新
+
+`yarn add webpack-dev-serve -D`
+
+```js
+devServr: {
+    hot: true
+}
+```
+
+使用：`webpack serve`
+
+一般文件需要对单独需要热更新的文件进行配置，而`react、vue`之类的框架提供了HMR(`vue-loader、@pmmmwh/react-refresh-webpack-plugin react-refresh`)
+
+# publicPath的作用
+
+## output中
+
+在打包之后的静态资源前面进行一个路径的拼接，大多配置为`./`
+
+```js
+output: {
+    path: path.resolve(__dirname, 'build'),  // -> js/build
+    publicPath: "./"
+}
+"./" + "js/build"
+```
+
+## devServer中
+
+本地资源所存放的目录，默认为`/`
+
+```js
+devServer: {
+    hot: true,
+    publicPath: "/"
+}
+```
+
+建议两处的`publicPath`的配置一样
+
+# devServer中的其他配置
+
+## contentBase
+
+指定静态引入的资源的查找目录，默认为当前文件夹
+
+## port
+
+指定服务监听的端口，默认为8080
+
+## open
+
+默认为`false`，为`true`时当项目编译完成会自动打开浏览器
+
+## compress
+
+设置是否为静态文件开启gzip压缩，默认为false
+
+# entry的路径
+
+entry的路径是相对于contex的，不指定contex的路径时默认为启动webpack时命令所在的目录
+
+# 对代码进行分割（可复用代码进行抽离）
+
+```js
+optimization: {
+    // 分包后的文件名
+    // natural  自然数 不推荐
+    // named  文件路径_文件名_output中的filename  可以在output中声明 chunkFilename: "[name].chunk.js"
+    // deterministic  生成id，针对相同的文件生成的id是不变的
+    chunkIds: "deterministic",
+    splitChunks: {
+        // async 异步导入
+        // initial 同步导入
+        // all 异步/同步导入
+        chunks: "all",
+        // 最小尺寸，如果包的大小未达到minSize则不拆分
+        minSize: 20000,
+        // 将大于maxSize的包拆分成不小于minSize的包
+        maxSize: 30000,
+        // 表示被导入的包最少被引入了几次
+        minChunks: 1,
+        // 将匹配到的所有文件一起打包到指定文件中
+        cacheGroups: {
+            vendor: {
+                test: /[\\/]node_modules[\\/]/,
+                filename: "[id]_vendors.js"
+            }
+        }
+    }
+}
+```
+
