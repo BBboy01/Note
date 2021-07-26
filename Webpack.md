@@ -113,7 +113,7 @@ use: [
 `yarn add mini-css-extract-plugin -D`
 
 ```js
-const miniCssExtractPlugin = require("mini-css-extract-plugin")
+const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 
 test: "/\.css/",
 use: [
@@ -122,9 +122,21 @@ use: [
 ]
 
 plugins: [
-    new miniCssExtractPlugin({
-        filename: "css/[name].[hash:6].css"
+    new MiniCssExtractPlugin({
+        filename: "css/[name].[chunkhash:6].css"
     })
+]
+```
+
+# 对css进行压缩
+
+`yarn add css-minimizer-webpack-plugin -D`
+
+```js
+const CssMinimizerWebpackPlugin = require("css-minimizer-webpack-plugin")
+
+plugins: [
+    new CssMinimizerWebpackPlugin()
 ]
 ```
 
@@ -155,9 +167,9 @@ plugins: [
 {
     loader: "file-loader",
 	options: {
-        // name: "[name].[hash:6].[ext]",
+        // name: "[name].[chunkhash:6].[ext]",
         // outputPath: "img"  // 会将图片重命名后复制到 build/img 中
-        name: "img/[name].[hash:6].[ext]"
+        name: "img/[name].[chunkhash:6].[ext]"
     }
 }
 ```
@@ -267,7 +279,7 @@ module.export = {
 }
 ```
 
-自动为打包后的文件夹中添加`index.html`
+## 自动为打包后的文件夹中添加`index.html`
 
 `yarn add html-webpack-plugin -D`
 
@@ -278,7 +290,21 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 plugins: [
     new HtmlWebpackPlugin({
         title: "assign your web title",
-        template: "public/index.html"
+        // 指定模板文件，也可以不指定使用自动生成的
+        template: "public/index.html",
+        // 当文件没有发生任何改变时直接使用之前的缓存
+        cache: true,
+        // 是否压缩代码 默认为true
+        minify: isProduction ? {
+            // 是否移除注释
+            removeComments: true,
+            // 是否移除冗余的属性 例如input标签默认type为text不用再声明type=text
+            removeRedundantAttributes: false,
+            // 是否移除空属性
+            removeEmptyAttributes: true,
+            // 是否移除空白
+            collapseWhitespace: true
+        } : false
     })
 ]
 ```
@@ -585,5 +611,79 @@ plugins: [
         template: "public/index.html"
     })
 ]
+```
+
+# 对打包的文件进行作用域提升
+
+默认情况下webpack打包会有很多作用域，无论是从最开始的代码开始执行，还是加载一个模块，都需要执行一系列的函数，而作用域提升后可以将函数合并到一个模块中来运行，使得webpack打包后的代码更小，运行更快
+
+这个插件是基于对ESM的静态分析，因此导包的时候如果想使用作用域提升进行优化就尽量使用`import`的语法静态导入
+
+```js
+plugins: [
+    new webpack.optimeze.ModuleConcatenationPlugin()
+]
+```
+
+# TreeShaking
+
+## JS
+
+### usedExports
+
+- 将optimization中的usedExports设置为true，同时需要配合Terser。此时打包时便会标记未使用的函数
+- 打包后会发现没有使用到的代码不会被添加到打包的文件中
+
+### sideEffects
+
+- 用于告知webpack compiler哪些模块是有副作用的
+- 如果sideEffects为false，那么对于一些未使用到的import在打包时便会删除
+- 对于css文件，可以再在loader中单独为其设置`sideEffects: true`
+
+## CSS
+
+`yarn add purge-css-plugin -D`
+
+```js
+const PurgeCssPlugin = require("purge-css-plugin")
+const glob = require("glob")
+
+plugins: [
+    new PurgeCssPlugin({
+        // 需要做treeshaking的css代码的路径
+        path: glob.sync(`${__dirname}/src/**/*`, {nodir: true}),
+        // 添加白名单
+        safeList: function() {
+            return {
+                standard: ["body", "html"]
+            }
+        }
+    })
+]
+```
+
+# 压缩
+
+`yarn add compression-webpack-plugin -D`
+
+```js
+const CompressionWebpackPlugin = require("compression-webpack-plugin")
+
+plugins: [
+    new CompressionWebpackPlugin()
+]
+```
+
+# 对自定义第三方包进行打包发布
+
+```js
+output: {
+    // 适配AMD，ESM，CommonJS(无module)，CommonJS2(有module) 这样会在打包的文件中对导出的东西进行规范的判断然后统一导出
+    libraryTarget: "umd",
+    // 库的名称 webpack会根据名称对齐导出的内容进行遍历然后统一导出
+    library: "myUtils",
+    // 全局对象
+    globalObject: "this"
+}
 ```
 
