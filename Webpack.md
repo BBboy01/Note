@@ -31,13 +31,15 @@ not dead
 
 # 对css进行兼容处理
 
+> **行内样式**
+
 ## 加前缀
 
 `yarn add postcss autoprefixer postcss-loader -D`
 
 ```js
 module: {
-    {
+    rules: [
         test: /\.css/,
         use: [
              "style-loader",  // 将css插入到index.html中
@@ -54,7 +56,7 @@ module: {
                  }
              }
         ]
-    }
+    ]
 }
 ```
 
@@ -103,6 +105,26 @@ use: [
         }
     },
     "postcss-loader"
+]
+```
+
+# 将css代码抽离到文件中
+
+`yarn add mini-css-extract-plugin -D`
+
+```js
+const miniCssExtractPlugin = require("mini-css-extract-plugin")
+
+test: "/\.css/",
+use: [
+    isProduction ? miniCssExtractPlugin.loader : "style-loader",
+    "css-loader"
+]
+
+plugins: [
+    new miniCssExtractPlugin({
+        filename: "css/[name].[hash:6].css"
+    })
 ]
 ```
 
@@ -496,11 +518,11 @@ devServer: {
 
 entry的路径是相对于contex的，不指定contex的路径时默认为启动webpack时命令所在的目录
 
-# 对代码进行分割（可复用代码进行抽离）
+# optimization对代码进行分割（可复用代码进行抽离）
 
 ```js
 optimization: {
-    // 分包后的文件名
+    // 分包后的文件名 开发环境下默认为named 生产环境下默认为deterministic
     // natural  自然数 不推荐
     // named  文件路径_文件名_output中的filename  可以在output中声明 chunkFilename: "[name].chunk.js"
     // deterministic  生成id，针对相同的文件生成的id是不变的
@@ -525,5 +547,43 @@ optimization: {
         }
     }
 }
+```
+
+# Prefetch和Preload
+
+预获取和预加载。在声明异步import时，可以提前获取资源文件
+
+```js
+import(
+/* webpackPrefetch: true */
+"./component"
+).then(( { default: component } ) => { console.log(component) })
+```
+
+prefetch会在加载完所有需要立即加载的文件后等待浏览器空闲的时候向服务器发送请求来获取资源文件，然后放入缓存中
+
+preload会在父chunk加载的同时并行加载
+
+# 对于第三方包不进行打包而是改为引入cdn
+
+先在webpack中排除第三方库的打包
+
+```js
+externals: {
+    // 第二个参数为第三方库导出的全局对象
+    lodash: "_",
+    dayjs: "dayjs"
+}
+```
+
+然后再在`index.html`的模板文件中手动引入第三方库的cdn
+
+```js
+plugins: [
+    new HtmlWebpackPlugin({
+        title: "assign your web title",
+        template: "public/index.html"
+    })
+]
 ```
 

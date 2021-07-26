@@ -13,6 +13,16 @@
 
 在项目中的任何一个地方的相对路径，都是相对于process.cwd()，即在哪一个文件夹启动的项目，process.cwd()就是哪个目录
 
+# 环境变量坑爹Tip
+
+node在环境变量中的值为键值对形式，而每个键所对应的值均为String类型，因此当为node环境变量赋值的时候都会默认转为String
+
+```js
+const isProduction = undefined
+process.env.isProduction = isProduction
+console.log(!!process.env.isProduction, typeof process.env.isProduction)  // true string
+```
+
 # Express
 
 ## 简易的搭建后台服务
