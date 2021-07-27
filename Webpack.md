@@ -29,6 +29,44 @@ not dead
 
 所有结果都是基于`caniuse.com/usage-table`提供的数据
 
+# 配置了多个loader但是想让其中一个每次都最先执行
+
+一种规则的多个loader的执行顺序为从后往前，但是可以通过设置`enforce`属性来使某些loader不依赖书写的顺序执行
+
+loader的执行是通过`pitchLoader`和`normalLoader`来执行，pitchLoader阶段对`loaderIndex++`，`normalLoader`阶段对`loaderIndex--`
+
+- 默认所有的`loader`都是`normal`
+- `pitchLoader`执行顺序：post -> inline -> normal -> pre
+- `normalLoader`执行顺序：pre-> normal -> inline-> post
+
+```js
+rules: [
+    {
+        test: /\.js$/,
+        loader: "loader1"
+    },
+    {
+        test: /\.js$/,
+        loader: "loader2",
+        enforce: "pre"
+    },
+    {
+        test: /\.js$/,
+        loader: "loader3"
+    },
+    {
+        test: /\.js$/,
+        loader: "loader4"
+    },
+]
+
+resolveLoader: {  // 配置查找模块的路径
+    modules: ["node_modules", "./myLoaders"]
+}
+```
+
+
+
 # 对css进行兼容处理
 
 > **行内样式**
