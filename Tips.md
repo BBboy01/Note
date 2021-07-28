@@ -1,3 +1,13 @@
+## 将数组中`false、undefined、null、0`之类的隐式为`false`的类型的数据过滤掉
+
+```js
+const arr = [true, "aaa", null, "bbb", undefined, "ccc", false, "ddd", 0]
+console.log(arr)  // [true, "aaa", null, "bbb", undefined, "ccc", false, "ddd"]
+
+const newArr = arr.filter(Boolean)
+console.log(newArr)  // [true, "aaa", "bbb", "ccc", "ddd"]
+```
+
 ## 组件是什么？类是什么？类被编译成什么？
 
 - 组件指的是页面的一部分
