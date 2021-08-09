@@ -8,6 +8,22 @@ const newArr = arr.filter(Boolean)
 console.log(newArr)  // [true, "aaa", "bbb", "ccc", "ddd"]
 ```
 
+## js判断当前页面是否被切换
+
+可以判断电脑桌面的切换、同一个浏览器中标签的切换，然而只要是非全屏状态的电脑应用切换不会触发
+
+```js
+window.addEventListener("visibilitychange",function(){
+　　console.log(document.hidden)
+    console.log(document.visibilityState)
+});
+```
+
+| document.hidden          | document.visibilityState |
+| ------------------------ | ------------------------ |
+| true:表示被隐藏，不可见  | hidden:表示隐藏状态      |
+| false:表示未被隐藏，可见 | visible:表示是可见状态   |
+
 ## 组件是什么？类是什么？类被编译成什么？
 
 - 组件指的是页面的一部分
@@ -319,3 +335,4 @@ Koa中`next`的实现是返回`Promise`的，所以可以`await next()`来等待
     }
 }
 ```
+
