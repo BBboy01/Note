@@ -525,3 +525,42 @@ console.log(el.dataset.index)
 
 
 
+# watch的使用
+
+- `watch`需要侦听特定的数据源，并在回调函数中执行副作用
+
+- 默认情况下是惰性的，只有当被侦听的数据发生改变的时候才会执行回调
+- 与`watchEffect`相比，`watch`允许我们：
+  - 懒执行（第一次不会直接运行）
+  - 更具体的说明哪些状态发生改变时，触发侦听器的执行
+  - 访问侦听状态变化前后的值（`watchEffect`访问不到）
+
+```js
+const info = reactive({name: "dio", age: "21"})
+const slogan = ref("The World")
+
+const changeInfo = () => {
+    info.name = "jojo"
+    slogan.value = "pinjiaku"
+}
+
+// 1.传入一个reactive对象 获取到的newVal, oldVal都是reactive对象 直接传reactive对象监听不到oldVal
+watch(info, (newVal, oldVal) => {
+    console.log(newVal, oldVal)  // Proxy {name: "jojo", age: "21"}  Proxy {name: "jojo", age: "21"}
+})
+watch(() => ({ ...info }), (newVal, oldVal) => {
+    console.log(newVal, oldVal)  // {name: "jojo", age: "21"}  {name: "dio", age: "21"}
+})
+
+// 2.传入一个函数
+watch(() => info, (newVal, oldVal) => {
+    console.log(newVal, oldVal)  // jojo  dio
+})
+
+// 3.传入Array对象
+watch([() => ({ info }), slogen], ([newInfoVal, newSloganVal], [oldInfoVal, oldSloganVal]) => {
+	console.log(newInfoVal, newSloganVal, oldInfoVal, oldSloganVal)
+    // {name: "jojo", age: "21"} pinjiaku  {name: "dio", age: "21"} The World
+})
+```
+
