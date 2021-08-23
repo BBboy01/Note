@@ -354,7 +354,7 @@ const AsyncHomeComponentMethod2 = defineAsyncComponent({
 - leave-to-class
 
 ```vue
-// 以 Animate.css 为例
+<!-- 以 Animate.css 为例 -->
 <transition enter-active-class="animate__animated animate__fadeInDown"
             leave-active-class="animate__animated animate__flipInY">
 	<h2 v-if="isShow">
@@ -561,6 +561,85 @@ watch(() => info, (newVal, oldVal) => {
 watch([() => ({ info }), slogen], ([newInfoVal, newSloganVal], [oldInfoVal, oldSloganVal]) => {
 	console.log(newInfoVal, newSloganVal, oldInfoVal, oldSloganVal)
     // {name: "jojo", age: "21"} pinjiaku  {name: "dio", age: "21"} The World
+})
+```
+
+# Not Found匹配路由
+
+```js
+{
+    path: "/:pathMetch(.*)",
+    component: () => import("../pages/NotFound.vue")
+}
+```
+
+`/:pathMetch(.*)*`会将路径按`/`分割放到params数组中
+
+# `router-link`自定义`tag`
+
+默认情况下，`router-link`下的元素在渲染的时候是`a`标签，之前可以通过`tag="xxx"`来设置渲染的标签类型，但是在`vue-router`4以后不再支持此方式，改为`slot`的方式，使得内容更加灵活，甚至支持组件
+
+```vue
+<!-- props: href  跳转的链接 -->
+<!-- props: isActive  是否处于激活状态 -->
+<!-- props: isExecActive  是否处于精确的激活状态 -->
+<!-- props: navigate  导航函数 -->
+<router-link to="/home" v-slot="props" custom>
+	<strong @click="props.navigate">link 1</strong>
+	<div>link 2</div>
+</router-link>
+```
+
+# `router-view`获取当前匹配的组件
+
+```vue
+<router-view v-slot="props">
+	{{ props.Component }}
+</router-view>
+```
+
+- 为组件切换添加动画
+
+```vue
+<router-view v-slot="props">
+    <transition name="dio">
+		<component :is="props.Component"/>    
+    </transition>
+</router-view>
+
+<style>
+	.dio-enter-from,
+    .dio-leave-to {
+        opacity: 0;
+    }
+    
+    .dio-enter-to,
+    .dio-leave-from {
+        opacity: 1;
+    }
+    
+    .dio-enter-active,
+    .dio-leave-active {
+        transition: opacity 1s ease;
+    }
+</style>
+```
+
+# 动态添加路由
+
+```js
+const categoryRoutes = {
+    path: "/category",
+    component: () => import("../pages/Category.vue")
+}
+
+// 添加一级路由
+router.addRoute(categoryRoutes)
+
+// 添加二级路由，以`name`查找
+router.addRoute("home", {
+    path: "category",
+    component: () => import("../pages/Category.vue")
 })
 ```
 
