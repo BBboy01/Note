@@ -643,3 +643,33 @@ router.addRoute("home", {
 })
 ```
 
+# `mapState`在`CompositionAPI`中的使用
+
+`mapGetters`类似
+
+`mapState`中返回的对象在使用时会调用`this.$store`来访问`store`中的数据
+
+```js
+import { useStore, mapState } from "vuex"
+
+setup() {
+    const store = useStore()
+    const storeFuncs = mapState(["counter", "name", "age"])
+    
+    const storeState = {}
+    Object.keys(storeFuncs).forEach((fnKey) => {
+        const fn = storeFuncs[fnKey].bind({$store: store})
+        storeState[fnKey] = computed(fn)
+    })
+    
+    return {
+        ...storeState
+    }
+}
+```
+
+# Vuex中各个方法接收的参数
+
+- `getters`:	  state, getters
+- `mutations`:  state, payload
+- `actions`:      context, payload  context: { commit, dispatch, getters, rootGetters, state, rootState }
