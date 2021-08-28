@@ -1,3 +1,7 @@
+最终效果（基于`Windows Terminal`）
+
+![image-20210828153145111](https://gitee.com/RealBBboy/mark-down-images-repo/raw/master/NoteImg/image-20210828153145111.png)
+
 打开 powershell 检查是否以及拥有配置文件
 
 ```shell
