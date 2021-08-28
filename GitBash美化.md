@@ -86,7 +86,7 @@ else
 	PS1="$PS1"'\[\033[35m\]'       # change to purple
 	PS1="$PS1"''          # 不显示系统名
 	PS1="$PS1"'\[\033[33m\]'       # change to brownish yellow
-	PS1="$PS1"'\w'                 # current working directory
+	PS1="$PS1"'\w'                 # \W为利用basename取得工作目录名称，所以只会列出最后一个目录 
 	if test -z "$WINELOADERNOEXEC"
 	then
 		GIT_EXEC_PATH="$(git --exec-path 2>/dev/null)"
