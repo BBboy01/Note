@@ -121,7 +121,7 @@ app.post('/test', (req, res) => {
 ### 为所有路由添加前缀
 
 ```js
-const Router = require('koa-router')
+const Router = require('@koa/router')
 const router = new Router({prefix: '/api'})
 
 router.get('/userInfo', async ctx => {  // /api/userInfo
@@ -1426,14 +1426,24 @@ app.on('error', (err, ctx) => {
 })
 ```
 
+## CORS配置
+
+`yarn add @koa-cors`
+
+```js
+const cors = require("@koa/cors");
+
+app.use(cors());
+```
+
 ## 路由中间件
 
-- 安装 koa-router
+- 安装 `@koa/router`
 
 ```js
 // 中间件
 const Koa = require('koa');
-const Router = require('koa-router');
+const Router = require('@koa/router');
 const app = new Koa();
 
 const router = new Router();
@@ -1461,7 +1471,7 @@ app.use(router.routes());
 const Koa = require("koa");
 const bodyParser = require("koa-bodyparser");
 const router = require("./routers/note");
-const koaRouter = require("koa-router")();
+const koaRouter = require("@koa/router")();
 
 const app = new Koa();
 
@@ -1531,7 +1541,7 @@ router.post("/", function (ctx){
 ```js
 const app = new Koa();
 const multer = require('koa-multer');
-const Router = require('koa-router');
+const Router = require('@koa/router');
 
 const upload = multer();
 const router = new Router({prefix: '/upload'});
@@ -1549,7 +1559,7 @@ router.post("/", upload.any(), (ctx, next) => {
 ```js
 const app = new Koa();
 const multer = require('koa-multer');
-const Router = require('koa-router');
+const Router = require('@koa/router');
 
 const upload = multer({
     dest: './uploads/'  // 文件上传到的路径 如果没有该文件夹会自动创建
@@ -1567,7 +1577,7 @@ router.post("/picture", upload.array('picture', 9), (ctx, next) => {
 });
 ```
 
-这两者的组合没什么问题，不过 `koa-multer` 和 `koa-route`（注意不是 `koa-router`） 存在不兼容的问题。
+这两者的组合没什么问题，不过 `koa-multer` 和 `koa-route`（注意不是 `@koa/router`） 存在不兼容的问题。
 
 因此使用当使用`koa-route`时用`koa-body`代替（**其实也用不上**）
 
@@ -1664,7 +1674,7 @@ Jimp.read(file.path).then((image) => {
 ```js
 // 设置和获取cookie
 const Koa = require('koa');
-const Router = require('koa-router');
+const Router = require('@koa/router');
 const app = new Koa();
 let router = new Router();
 
@@ -1701,7 +1711,7 @@ router.get("/", function (ctx){
 ```js
 // 设置和获取session
 const Koa = require('koa');
-const Router = require('koa-router');
+const Router = require('@koa/router');
 const session = require('koa-session');
 const app = new Koa();
 
@@ -1746,7 +1756,7 @@ module.exports = async (ctx, next) => {
 
 ```js
 const Koa = require('koa');
-const Router = require('koa-router');
+const Router = require('@koa/router');
 const bodyParser = require('koa-bodyparser')
 const session = require('koa-session');
 const app = new Koa();
@@ -1867,7 +1877,7 @@ app.use(static(path.join( __dirname,  'public')))
 ```js
 // 静态资源中间件
 const Koa = require('koa');
-const Router = require('koa-router');
+const Router = require('@koa/router');
 const static = require('koa-static')
 const path = require('path')
 const app = new Koa();
@@ -1945,7 +1955,7 @@ router.get("/", function (ctx, next){
 // art-template使用
 const Koa = require('koa');
 const path = require('path');
-const Router = require('koa-router');
+const Router = require('@koa/router');
 const render = require('koa-art-template');
 const app = new Koa();
 
