@@ -928,7 +928,7 @@ app.get("/", (req,res)=>{
 
 - CSRF请求伪造的示意图：
 
-![CSRF攻击过程](./assets/CSRF攻击过程.png)
+![CSRF攻击过程](https://gitee.com/RealBBboy/mark-down-images-repo/raw/master/NoteImg/CSRF%E6%94%BB%E5%87%BB%E8%BF%87%E7%A8%8B.png)
 
 ### CSRF防护思路
 
@@ -1109,7 +1109,7 @@ console.log(str);
 
 ### JWT
 
-![jwt](./assets/jwt.png)
+![jwt](https://gitee.com/RealBBboy/mark-down-images-repo/raw/master/NoteImg/jwt.png)
 
 #### 对称签名加密
 
@@ -1161,7 +1161,7 @@ router.get('/getUser-token', jwtAuth({ salt }), async ctx => {
 
 - 前端发送
 
-![image-20210704155332932](assets/image-20210704155332932.png)
+![image-20210704155332932](https://gitee.com/RealBBboy/mark-down-images-repo/raw/master/NoteImg/image-20210704155332932.png)
 
 ```js
 axios.interceptors.request.use( config => {
@@ -1299,7 +1299,7 @@ res.setHeader("Access-Control-Allow-Origin", "*")
 
 - jsonp 就是前端利用 script 在页面不刷新的情况下和服务器进行交互一种技术。拿 json 格式的数据去填充一个函数，英语：json with paddding a function 简称：jsonp
 
-  ![跨域和jsonp](./assets/跨域和jsonp.png)
+  ![跨域和jsonp](https://gitee.com/RealBBboy/mark-down-images-repo/raw/master/NoteImg/%E8%B7%A8%E5%9F%9F%E5%92%8Cjsonp.png)
 
 #### 普通模式使用
 

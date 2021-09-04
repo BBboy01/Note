@@ -292,7 +292,7 @@ docker中每建立一个容器都会创建两个虚拟网卡，一个为容器�
 
 此时使用`netstat -lntup`查看占用的端口便会看到3个wordpress服务占用了宿主机3个随机的端口映射到wordpress的80口上
 
-![image-20210708131427253](assets/image-20210708131427253.png)
+![image-20210708131427253](https://gitee.com/RealBBboy/mark-down-images-repo/raw/master/NoteImg/image-20210708131427253.png)
 
 此时便可以使用**Nginx**做负载均衡`vim /etc/nginx/nginx.conf`
 
