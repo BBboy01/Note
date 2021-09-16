@@ -1,3 +1,21 @@
+## 安装
+
+```shell
+yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+yum install docker-ce docker-ce-cli containerd.io -y
+
+mkdir /etc/docker
+
+tee /etc/docker/daemon.json << 'EOF'
+{
+	"registry-mirrors": ["https://registry.docker-cn.com"]
+}
+EOF
+
+systemctl daemon-reload
+systemctl restart docker
+```
+
 ## 容器的常用管理命令
 
 1. docker的镜像管理

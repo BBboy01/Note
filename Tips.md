@@ -336,3 +336,109 @@ Koa中`next`的实现是返回`Promise`的，所以可以`await next()`来等待
 }
 ```
 
+## 迭代器
+
+为各种不同的数据结构提供统一的访问机制，任何数据结构只要部署`Iterator`接口，就可以完成遍历操作(`for of`循环)，依次处理该数据结构的所有成员
+
+- 拥有`next`方法用于依次遍历数据结构的成员
+- 每次遍历返回的结果是一个对象：`{ done: Boolean, value: any }`
+  - done 记录是否遍历完成
+  - value 当前遍历的结果
+
+拥有`Symbol.iterator`属性的数据结构，被称为可被遍历的
+
+- Array
+- 部分`类数组`：arguments/NodeList/HTMLCollection...
+- String
+- Set
+- Map
+- generator object
+- ...
+
+对象默认不具备`Symbol.iterator`，属于不可被遍历的数据结构
+
+```js
+class Iterator {
+  constructor(assemble) {
+    this.assemble = assemble;
+    this.index = 0;
+  }
+
+  next() {
+    if (this.index > this.assemble.length - 1)
+      return { done: true, value: undefined };
+    return { done: false, value: this.assemble[this.index++] };
+  }
+}
+
+const arr = [1, 2, 3, 4];
+const iter = new Iterator(arr);
+
+console.log(iter.next()); // { done: false, value: 1 }
+console.log(iter.next()); // { done: false, value: 2 }
+console.log(iter.next()); // { done: false, value: 3 }
+console.log(iter.next()); // { done: false, value: 4 }
+console.log(iter.next()); // { done: true, value: undefined }
+```
+
+## `for in`和`for of`的区别
+
+`for in`的循环机制
+
+- 优先迭代数字属性
+
+- 无法迭代`Symbol`的私有属性
+
+- 遍历完私有属性后会遍历公有属性（性能差）只能遍历第一层的`key`
+
+  ```js
+  Object.property.AA = 20
+  
+  const obj = {
+      1: 'dio',
+      name: 'jojo',
+      [Symbol('AA')]: 10
+  }
+  
+  for (let key in obj) {
+      // 避免遍历到公有属性 然而依旧有性能问题
+      if (!obj.hasOwnProperty(key)) break
+      console.log(key)
+  }
+  
+  // 获取所有私有属性的名字
+  let keys = Object.getOwnPropertyNames(obj)  // Object.keys(obj)
+  keys = keys.concat(Object.getOwnPropertySymbols(obj))
+  keys.forEach((key) => {
+      conslole.log(key, obj[key])
+  })
+  ```
+
+`for of`的循环机制
+
+- 自动调用对象的`Symbol.iterator`方法获取到一个`itor`对象，每次获取值则调用该对象的`next`方法
+
+  ```js
+  let arr = [1, 2, 3, 4, 5]
+  
+  for (let item of arr) {
+      console.log(item)  // 1 2 3 4 5
+  }
+  
+  arr[Symbol.iterator] = function () {
+      let index = -2
+      
+      return {
+          next() {
+              if (index > this.length - 1) return { done: true, value: undefined }
+              return { done: false, value: this[index += 2]}
+          }
+      }
+  }
+  
+  for (let item of arr) {
+      console.log(item)  // 1 3 5 undefined
+  }
+  ```
+
+  
