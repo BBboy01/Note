@@ -441,4 +441,51 @@ console.log(iter.next()); // { done: true, value: undefined }
   }
   ```
 
-  
+
+## `instanceof`的原理
+
+调用`instanceof`时会调用对象的`Symbol.hasInstance`方法
+
+```js
+class Fn {
+    constructor() {
+        this.x = Symbol.for('Fn.x')
+    }
+    
+    static [Symbol.hasInstance](obj) {
+        return obj.x && obj.x === Symbol.for('Fn.x')
+    }
+}
+
+const f = new Fn()
+
+// obj instanceof Ctor => Ctor[Symbol.hasInstance](obj)
+console.log(f instanceof Fn)  // true
+
+const arr = [1, 2, 3]
+// 此时尽管修改了 arr 的原型，但是会调用自定义的 Symbol.hasInstance 方法来判断
+Object.setPrototypeOf(arr, Fn.prototype)
+console.log(arr instanceof Fn)  // false
+```
+
+## 对象和数字比较的隐式转换
+
+对象 == 数字  默认把对象转换为数字
+
+1. 首先看对象是否有`obj[Symbol.toPrimitive]`方法，有则按该方法执行
+2. 没有则使用`obj.valueOf()`验证是否为原始值类型
+3. 如过不是原始值类型，则调用`obj.toString()`变为字符串
+4. 将字符串变为数字
+
+```js
+const a = {
+    i: 0
+}
+
+a[Symbol.toPrimitive] = function () {
+    return ++this.i
+}
+
+console.log(a == 1 && a == 2 && a == 3)  // true
+```
+
