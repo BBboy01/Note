@@ -673,3 +673,18 @@ setup() {
 - `getters`:	  state, getters
 - `mutations`:  state, payload
 - `actions`:      context, payload  context: { commit, dispatch, getters, rootGetters, state, rootState }
+
+# 环境变量的注入
+
+在项目根目录中添加`.env.development`、`.env.production`、`.env.production`，其中`NODE_ENV`、`BASE_URL`、`VUE_APP_xxx`可以通过`webpack.DefinePlugin`注入
+
+```yaml
+VUE_APP_BASE_URL=https://bbboy.org/api
+```
+
+使用
+
+```js
+console.log(process.env.VUE_APP_BASE_URL)  // https://bbboy.org/api
+```
+

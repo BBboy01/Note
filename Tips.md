@@ -489,3 +489,13 @@ a[Symbol.toPrimitive] = function () {
 console.log(a == 1 && a == 2 && a == 3)  // true
 ```
 
+## `Element-Plus`组件按需引入时的问题
+
+当使用按需引入时，子组件不能从`element-plus`中导入，需要在对应的包中导入
+
+```js
+import { ElButton, ElTabs, ElForm, ElInput } from 'element-plus'
+import { ElTabPane } from 'element-plus/lib/components/tabs'
+import { ElFormItem } from 'element-plus/lib/components/form'
+```
+
