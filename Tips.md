@@ -24,6 +24,22 @@ window.addEventListener("visibilitychange",function(){
 | true:表示被隐藏，不可见  | hidden:表示隐藏状态      |
 | false:表示未被隐藏，可见 | visible:表示是可见状态   |
 
+- 监听页面可见性变化事件
+
+```js
+document.addEventListener('visibilitychange', function () {
+  // 用户离开了当前页面
+  if (document.visibilityState === 'hidden') {
+    document.title = '页面不可见';
+  }
+
+  // 用户打开或回到页面
+  if (document.visibilityState === 'visible') {
+    document.title = '页面可见';
+  }
+});
+```
+
 ## 组件是什么？类是什么？类被编译成什么？
 
 - 组件指的是页面的一部分
