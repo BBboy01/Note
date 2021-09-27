@@ -8,6 +8,17 @@ const newArr = arr.filter(Boolean)
 console.log(newArr)  // [true, "aaa", "bbb", "ccc", "ddd"]
 ```
 
+## `load`和`ready`的区别
+
+```js
+document.addEventListener('load', () => {
+    // 页面资源加载完才会执行，包括图片、视频等
+})
+document.addEventListener('DOMContentLoaded', () => {
+    // DOM渲染完即可，此时图片、视频可能还没有加载完
+})
+```
+
 ## js判断当前页面是否被切换
 
 可以判断电脑桌面的切换、同一个浏览器中标签的切换，然而只要是非全屏状态的电脑应用切换不会触发
@@ -405,6 +416,8 @@ console.log(iter.next()); // { done: true, value: undefined }
 
 - 无法迭代`Symbol`的私有属性
 
+- 无法迭代`enumerable=false`的`key`
+
 - 遍历完私有属性后会遍历公有属性（性能差）只能遍历第一层的`key`
 
   ```js
@@ -515,3 +528,75 @@ import { ElTabPane } from 'element-plus/lib/components/tabs'
 import { ElFormItem } from 'element-plus/lib/components/form'
 ```
 
+## `&&`、`||`逻辑操作符
+
+通常情况下，`exp1 && exp2`，当 exp1 可以被转化为逻辑 true 时， 则返回 exp2，否则返回 exp1
+
+`exp1 || exp2`，当 exp1 可以被转化为逻辑 true时， 返回 exp1，否则返回 exp2
+
+但是当两个都为 false 的时候，`&&`返回 exp1，`||` 返回 exp2
+
+```js
+const a = null;
+const b = undefined;
+const c = a || b;
+const d = a && b;
+console.log(c, d);  // undefined null
+```
+
+## `z-index`与元素层级
+
+`z-index`只影响同一级元素
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      div {
+        width: 100px;
+        height: 100px;
+      }
+      .red {
+        position: relative;
+        background-color: red;
+        z-index: 10;
+      }
+      .blue {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background-color: blue;
+        z-index: 30;
+      }
+      .yellow {
+        position: absolute;
+        top: 40px;
+        left: 40px;
+        background-color: yellow;
+        z-index: 50;
+      }
+      .black {
+        position: absolute;
+        top: 80px;
+        left: 10px;
+        background-color: black;
+        z-index: 20;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="red">
+      <div class="blue"></div>
+      <div class="yellow"></div>
+    </div>
+    <div class="black"></div>
+  </body>
+</html>
+```
+
+元素可见从上到下依次为`黑 -> 黄 -> 蓝 -> 红`
