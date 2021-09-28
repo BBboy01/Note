@@ -1,3 +1,13 @@
+## 使用`rem`时获取屏幕宽度
+
+```js
+document.documentElement.style.fontSize = document.documentElement.clientWidth / 37.5 + 'px'
+// 37.5 是因为设计稿通常是以 iphone6 设计的，iphone6 的宽度为 375px
+// 屏幕宽度为 375 的时候， 1rem = 10px
+// 屏幕宽度为 441 的时候， 1rem = 11.76px
+// 这样就实现了屏幕越大像素值越大，完成了适配
+```
+
 ## 将数组中`false、undefined、null、0`之类的隐式为`false`的类型的数据过滤掉
 
 ```js
@@ -49,6 +59,244 @@ document.addEventListener('visibilitychange', function () {
     document.title = '页面可见';
   }
 });
+```
+
+## `Object`方法
+
+### `create`
+
+`Object.create(obj1, optionalProps)`
+
+创建一个对象，使其上一层`__proto__`指向`obj1`
+
+`optionalProps`为可选的，不填写为`null`，可以填写属性描述符来为该对象声明值
+
+```js
+const father = Object.create(Object.prototype, {
+  a: {
+    value: 1,
+    configurable: true,
+    enumerable: true,
+  },
+  b: {
+    value: 2,
+    configurable: true,
+    enumerable: true,
+  },
+});
+
+console.dir(father)
+/*
+    a: 1
+    b: 2
+    [[Prototype]]: Object  // Object.prototype
+    constructor: ƒ Object()
+    hasOwnProperty: ƒ hasOwnProperty()
+    isPrototypeOf: ƒ isPrototypeOf()
+    propertyIsEnumerable: ƒ propertyIsEnumerable()
+    toLocaleString: ƒ toLocaleString()
+    toString: ƒ toString()
+    valueOf: ƒ valueOf()
+    __defineGetter__: ƒ __defineGetter__()
+    __defineSetter__: ƒ __defineSetter__()
+    __lookupGetter__: ƒ __lookupGetter__()
+    __lookupSetter__: ƒ __lookupSetter__()
+    __proto__: （…）
+    get __proto__: ƒ __proto__()
+    set __proto__: ƒ __proto__()
+*/
+
+const child = Object.create(father, {
+  c: {
+    value: 3,
+    configurable: true,
+    enumerable: true,
+  },
+  d: {
+    value: 4,
+    configurable: true,
+    enumerable: false,
+  },
+});
+
+console.dir(child)
+/*
+    c: 3
+    d: 4
+    [[Prototype]]: Object  // father
+        a: 1
+        b: 2
+        [[Prototype]]: Object
+            constructor: ƒ Object()
+            hasOwnProperty: ƒ hasOwnProperty()
+            isPrototypeOf: ƒ isPrototypeOf()
+            propertyIsEnumerable: ƒ propertyIsEnumerable()
+            toLocaleString: ƒ toLocaleString()
+            toString: ƒ toString()
+            valueOf: ƒ valueOf()
+            __defineGetter__: ƒ __defineGetter__()
+            __defineSetter__: ƒ __defineSetter__()
+            __lookupGetter__: ƒ __lookupGetter__()
+            __lookupSetter__: ƒ __lookupSetter__()
+            __proto__: （…）
+            get __proto__: ƒ __proto__()
+            set __proto__: ƒ __proto__()
+*/
+
+let result = [];
+
+for (let i in child) {
+  result.push(i);
+}
+
+console.log(result);  // [ 'c', 'a', 'b' ]
+console.log(Object.keys(child));  // ['c']
+console.log(Object.keys(father));  // ['a', 'b']
+```
+
+### `new`
+
+复制指定的对象(引用复制)，和`obj1 = obj2`效果一样
+
+`new Object(obj1)`
+
+```js
+const a = {
+    a: 1,
+    b: 2,
+    c: {
+        d: 3,
+        e: 4
+    }
+}
+
+const b = new Object(a)
+
+b === a  // true
+```
+
+## 去重
+
+`indexOf`只会返回第一个找到的下标
+
+```js
+const a = [1,2,3,2,1,2,3,3,4,6,3,8,4,1,9,6,4,0]
+
+function uniqueArr (array) {
+    return array.filter((item, index) => {
+        return array.indexOf(item) === index
+    })
+}
+
+uniqueArr(a)
+```
+
+## 移动端常用兼容`meta`
+
+```html
+<!-- 渲染引擎 避免用户使用IE内核的浏览器 -->
+<meta name="renderer" content="webkit" />
+<!-- 默认IE兼容模式 -->
+<meta name="renderer" content="ie-comp" />
+<!-- 默认IE标准模式 -->
+<meta name="renderer" content="ie-stand" />
+
+<meta http-equiv="X-UA-Compatible" content="IE-edge" />
+<!-- scale设置缩放 -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+```
+
+## CSS中的`@import`机制
+
+`@import`会在页面加载完毕后再加载
+
+```css
+/* style.css */
+html {
+    background-color: red;
+}
+```
+
+```css
+/* index.css */
+@import "style.css";
+
+html {
+    height: 100vh;
+    background-color: blue;
+}
+```
+
+```html
+<link rel="stylesheet" href="index.css" id="style" />
+```
+
+最终编译的效果为
+
+```css
+/* index.css */
+html {
+    background-color: red;
+}
+html {
+    height: 100vh;
+    background-color: blue;
+}
+```
+
+**即`@import`的内容会被编译到最上面**
+
+## 数组扁平化
+
+`Array.prototype.concat`会将多个变量中的一层数组展开并添加到目标中
+
+```js
+const arr = [1,2,3,4,[2,5,1,[2,31,5], 2,7],9,1,[0,1],8]
+
+function flatten (array) {
+    let arr = array || []
+    let finalArr = []
+    
+    arr.forEach( item => {
+        if (isArray(item)) {
+            finalArr = finalArr.concat(flatten(item))
+        } else {
+            finalArr.push(item)
+        }
+    })
+    
+    return finalArr
+    
+        function _isArray (obj) {
+            if (Object.prototype.toString.call(obj) === '[object Array]') return true
+            return false
+    	}
+}
+```
+
+```js
+Array.prototype.flatten = function () {
+    var self = this
+    var toStr = Object.prototype.toString
+    if (toStr.call(self) !== '[object Array]') {
+        throw new Error('only support Array type')
+    }
+    // var finalArr = []
+    // self.forEach(function (item) {
+    //     toStr.call(item) === '[object Array]'
+    //         ? finalArr = finalArr.concat(item.flatten())
+    //     	: finalArr.push(item)
+    // })
+    return self.reduce(function (prev, curr) {
+        return prev.concat(
+        	toStr.call(curr) === '[object Array]'
+            	? curr.flatten()
+            	: curr
+        )
+    }, [])
+    
+    // return finalArr
+}
 ```
 
 ## 组件是什么？类是什么？类被编译成什么？
