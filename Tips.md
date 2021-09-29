@@ -90,20 +90,6 @@ console.dir(father)
     a: 1
     b: 2
     [[Prototype]]: Object  // Object.prototype
-    constructor: ƒ Object()
-    hasOwnProperty: ƒ hasOwnProperty()
-    isPrototypeOf: ƒ isPrototypeOf()
-    propertyIsEnumerable: ƒ propertyIsEnumerable()
-    toLocaleString: ƒ toLocaleString()
-    toString: ƒ toString()
-    valueOf: ƒ valueOf()
-    __defineGetter__: ƒ __defineGetter__()
-    __defineSetter__: ƒ __defineSetter__()
-    __lookupGetter__: ƒ __lookupGetter__()
-    __lookupSetter__: ƒ __lookupSetter__()
-    __proto__: （…）
-    get __proto__: ƒ __proto__()
-    set __proto__: ƒ __proto__()
 */
 
 const child = Object.create(father, {
@@ -126,21 +112,7 @@ console.dir(child)
     [[Prototype]]: Object  // father
         a: 1
         b: 2
-        [[Prototype]]: Object
-            constructor: ƒ Object()
-            hasOwnProperty: ƒ hasOwnProperty()
-            isPrototypeOf: ƒ isPrototypeOf()
-            propertyIsEnumerable: ƒ propertyIsEnumerable()
-            toLocaleString: ƒ toLocaleString()
-            toString: ƒ toString()
-            valueOf: ƒ valueOf()
-            __defineGetter__: ƒ __defineGetter__()
-            __defineSetter__: ƒ __defineSetter__()
-            __lookupGetter__: ƒ __lookupGetter__()
-            __lookupSetter__: ƒ __lookupSetter__()
-            __proto__: （…）
-            get __proto__: ƒ __proto__()
-            set __proto__: ƒ __proto__()
+        [[Prototype]]: Object  // Object.prototype
 */
 
 let result = [];
@@ -174,6 +146,115 @@ const b = new Object(a)
 
 b === a  // true
 ```
+
+### `getPrototypeOf`
+
+获取对象的原型
+
+```js
+const a = {b: 1, c: 2, d: 3}
+
+Object.getPrototypeOf(a)  === a.__proto__ // true
+Object.getPrototypeOf(a)  === Object.prototype // true
+```
+
+### `setPrototypeOf`
+
+设置对象的原型
+
+```js
+const a = {b: 1, c: 2, d: 3}
+
+Object.setPrototypeOf(a, {e: 4, f: 5})
+/*
+    b: 1
+    c: 2
+    d: 3
+    [[Prototype]]: Object
+        e: 4
+        f: 5
+        [[Prototype]]: Object  // Object.prototype
+*/
+```
+
+### `getOwnProperty`
+
+获取自己身上非继承的属性
+
+```js
+const a = {b: 1, c: 2, d: 3}
+
+Object.setPrototypeOf(a, {e: 4, f: 5})
+
+Object.getOwnPropertyNames(a)  // ["b", "c", "d"]
+```
+
+### `seal`
+
+封闭对象：可读、可写，不可修改、不可删除
+
+```js
+const a = {b: 1, c: 2, d: 3}
+
+Object.seal(a)
+
+a.e = 1  // {b: 1, c: 2, d: 3}
+delete a.b  // {b: 1, c: 2, d: 3}
+a.b = 2  // {b: 2, c: 2, d: 3}
+```
+
+### `freeze`
+
+冻结对象：可读，不可写、不可修改、不可删除
+
+```js
+const a = {b: 1, c: 2, d: 3}
+
+Object.freeze(a)
+
+a.e = 1  // {b: 1, c: 2, d: 3}
+delete a.b  // {b: 1, c: 2, d: 3}
+a.b = 2  // {b: 1, c: 2, d: 3}
+```
+
+### `isExtensible`
+
+对象是否可扩展
+
+```js
+const a = {b: 1, c: 2, d: 3}
+
+Object.isExtensible(a)  // true
+Object.freeze(a)
+Object.isExtensible(a)  // false
+```
+
+`preventExtensions`
+
+禁止对象属性扩展（可删除）
+
+```js
+const a = {b: 1, c: 2, d: 3}
+
+Object.preventExtensions(a)
+a.e = 2  // {b: 1, c: 2, d: 3}
+
+delete a.b  // {c: 2, d: 3}
+```
+
+### `hasOwnProperty`
+
+判断对象自有属性是否有对应的属性
+
+```js
+const a = {b: 1, c: 2, d: 3}
+Object.setPrototypeOf(a, {e: 4, f: 5})
+
+a.hasOwnProperty('b')  // true
+a.hasOwnProperty('e')  // false
+```
+
+
 
 ## 去重
 
