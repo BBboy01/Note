@@ -863,8 +863,6 @@ import { ElFormItem } from 'element-plus/lib/components/form'
 
 `exp1 || exp2`，当 exp1 可以被转化为逻辑 true时， 返回 exp1，否则返回 exp2
 
-但是当两个都为 false 的时候，`&&`返回 exp1，`||` 返回 exp2
-
 ```js
 const a = null;
 const b = undefined;
