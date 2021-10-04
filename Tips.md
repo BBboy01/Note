@@ -287,6 +287,28 @@ uniqueArr(a)
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
 ```
 
+## HTML元素设置自定义属性以及JS获取
+
+- 设置 以`data-`开头
+
+```html
+<div id="dio" data-sizing="12"></div>
+```
+
+- 获取 从`dataset`获取
+
+```js
+const el = document.querySelector("#dio")
+el.dataset.sizing  // 12
+```
+
+## JS监听元素CSS`transition`结束
+
+```js
+const el = document.querySelecyor('div')
+el.addEventListener('transitionend', (e) => console.log('transition end'))
+```
+
 ## CSS中的`@import`机制
 
 `@import`会在页面加载完毕后再加载
