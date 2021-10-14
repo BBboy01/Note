@@ -63,6 +63,15 @@ document.addEventListener('visibilitychange', function () {
 
 ## `Object`方法
 
+### `assign`
+
+将对象浅层拷贝到指定对象中，如果重复则覆盖
+
+```js
+const a = Object.assign({}, {a: 1, b: 2})  // {a: 1, b: 2}
+Object.assign(a, {a: 1, b: 4, c: 3})  // {a: 1, b: 4, c: 3}
+```
+
 ### `create`
 
 `Object.create(obj1, optionalProps)`
