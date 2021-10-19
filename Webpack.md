@@ -190,7 +190,7 @@ plugins: [
 
 ```js
 {
-    test: /\.(png|jpe?g|gif|svg)/,
+    test: "/\.(png|jpe?g|gif|svg)/",
     use: [
         {
             loader: "file-loader",
@@ -389,7 +389,7 @@ plugins: [
 
 ## JS
 
-`yarn add babel @babel/core-loader -D`
+`yarn add babel-loader @babel/core -D`
 
 ```js
 {
@@ -408,7 +408,7 @@ plugins: [
 }
 ```
 
-- 根据`.broswerslistrc`中对浏览器的配置进行js转换适配
+- 根据`.browserslistrc`中对浏览器的配置进行js转换适配
 
 `yarn add @babel/preset-env -D`
 
