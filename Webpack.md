@@ -519,6 +519,24 @@ module.export = {
 }
 ```
 
+`yarn add esbuild-loader -D`
+
+```js
+{
+    test: /\.(js|jsx|ts|tsx)$/,
+	include: path.resolve(__dirname, 'src'),
+    use: [
+        {
+            loader: "esbuild-loader",
+            options: {
+                loader: "tsx",
+                target: "es2015"
+            }
+        }
+    ]        
+}
+```
+
 # 配置`webpack-dev-serve`为热更新
 
 `yarn add webpack-dev-serve -D`
