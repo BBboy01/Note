@@ -651,22 +651,14 @@ preload会在父chunk加载的同时并行加载
 先在webpack中排除第三方库的打包
 
 ```js
-externals: {
-    // 第二个参数为第三方库导出的全局对象
-    lodash: "_",
-    dayjs: "dayjs"
-}
+externals: ['react', 'react-dom']
 ```
 
 然后再在`index.html`的模板文件中手动引入第三方库的cdn
 
-```js
-plugins: [
-    new HtmlWebpackPlugin({
-        title: "assign your web title",
-        template: "public/index.html"
-    })
-]
+```html
+<script src="https://cdn.bootcdn.net/ajax/libs/react/17.0.2/umd/react.production.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js"></script>
 ```
 
 # 对打包的文件进行作用域提升
