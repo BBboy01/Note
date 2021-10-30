@@ -255,6 +255,8 @@ delete a.b  // {c: 2, d: 3}
 
 判断对象自有属性是否有对应的属性
 
+`in`会判断对象整个原型链上的所有属性
+
 ```js
 const a = {b: 1, c: 2, d: 3}
 Object.setPrototypeOf(a, {e: 4, f: 5})
@@ -262,8 +264,6 @@ Object.setPrototypeOf(a, {e: 4, f: 5})
 a.hasOwnProperty('b')  // true
 a.hasOwnProperty('e')  // false
 ```
-
-
 
 ## 去重
 
