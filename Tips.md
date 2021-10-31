@@ -476,6 +476,12 @@ window.addEventListener('click', e => {
 
 - 将传入的任何数据转换为`promise`对象
 
+## 上传文件指定文件的类型
+
+```html
+<input type="file" accept=".png,.jpeg,.jpg" />
+```
+
 ## React中事件调用顺序
 
 - root originalCapture
