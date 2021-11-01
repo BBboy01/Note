@@ -551,9 +551,9 @@ devServr: {
 
 一般文件需要对单独需要热更新的文件进行配置，而`react、vue`之类的框架提供了HMR(`vue-loader、@pmmmwh/react-refresh-webpack-plugin react-refresh`)
 
-# publicPath的作用
+# `publicPath`的作用
 
-## output中
+## `output`中
 
 在打包之后的静态资源前面进行一个路径的拼接，大多配置为`./`
 
@@ -565,7 +565,7 @@ output: {
 "./" + "js/build"
 ```
 
-## devServer中
+## `devServer`中
 
 本地资源所存放的目录，默认为`/`
 
@@ -578,29 +578,29 @@ devServer: {
 
 建议两处的`publicPath`的配置一样
 
-# devServer中的其他配置
+# `devServer`中的其他配置
 
-## contentBase
+## `contentBase`
 
 指定静态引入的资源的查找目录，默认为当前文件夹
 
-## port
+## `port`
 
 指定服务监听的端口，默认为8080
 
-## open
+## `open`
 
 默认为`false`，为`true`时当项目编译完成会自动打开浏览器
 
-## compress
+## `compress`
 
 设置是否为静态文件开启gzip压缩，默认为false
 
-# entry的路径
+# `entry`的路径
 
 entry的路径是相对于contex的，不指定contex的路径时默认为启动webpack时命令所在的目录
 
-# optimization对代码进行分割（可复用代码进行抽离）
+# `optimization`对代码进行分割（可复用代码进行抽离）
 
 ```js
 optimization: {
