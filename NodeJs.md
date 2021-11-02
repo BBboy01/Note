@@ -1536,11 +1536,11 @@ router.post("/", function (ctx){
 
 ### 解析`form-data`数据(不包含文件)
 
-- 安装`koa-multer`
+- 安装`@koa/multer multer`
 
 ```js
 const app = new Koa();
-const multer = require('koa-multer');
+const multer = require('@koa/multer');
 const Router = require('@koa/router');
 
 const upload = multer();
@@ -1558,12 +1558,17 @@ router.post("/", upload.any(), (ctx, next) => {
 
 ```js
 const app = new Koa();
-const multer = require('koa-multer');
+const multer = require('@koa/multer');
 const Router = require('@koa/router');
 
-const upload = multer({
-    dest: './uploads/'  // 文件上传到的路径 如果没有该文件夹会自动创建
-});
+const storage = multer.diskStorage({
+  destination: 'uploads',  // 文件上传到的路径 如果没有该文件夹会自动创建 如果是函数的形式，则需要手动创建文件夹
+  filename: function (req, file, cb) {
+    cb(null, file.originalname)
+  },
+})
+
+const upload = multer({ storage });
 const router = new Router({prefix: '/upload'});
 
 router.post("/avatar", upload.single('avatar'), (ctx, next) => {
@@ -1577,7 +1582,7 @@ router.post("/picture", upload.array('picture', 9), (ctx, next) => {
 });
 ```
 
-这两者的组合没什么问题，不过 `koa-multer` 和 `koa-route`（注意不是 `@koa/router`） 存在不兼容的问题。
+这两者的组合没什么问题，不过 `@koa/multer` 和 `koa-route`（注意不是 `@koa/router`） 存在不兼容的问题。
 
 因此使用当使用`koa-route`时用`koa-body`代替（**其实也用不上**）
 
