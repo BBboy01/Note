@@ -1582,82 +1582,35 @@ router.post("/picture", upload.array('picture', 9), (ctx, next) => {
 });
 ```
 
-这两者的组合没什么问题，不过 `@koa/multer` 和 `koa-route`（注意不是 `@koa/router`） 存在不兼容的问题。
-
-因此使用当使用`koa-route`时用`koa-body`代替（**其实也用不上**）
-
-- app.js
+### 使用`formData`中的字段作为文件名
 
 ```js
-const koaBody = require('koa-body');
-const app = new koa();
-app.use(koaBody({
-  multipart:true, // 支持文件上传
-  encoding:'gzip',
-  formidable:{
-    uploadDir:path.join(__dirname,'public/upload/'), // 设置文件上传目录
-    keepExtensions: true,    // 保持文件的后缀
-    maxFieldsSize:2 * 1024 * 1024, // 文件上传大小
-    onFileBegin:(name,file) => { // 文件上传前的设置
-      // console.log(`name: ${name}`);
-      // console.log(file);
-    },
+const storageHashName = multer.diskStorage({
+  destination: 'uploads/withContentHashFilename',
+  filename: function (req, file, cb) {
+      /**
+       * 前端将数据添加到 formData 中时需要注意顺序
+       * 需要使用的字段限于 file 添加
+       * 否则此处 req.body 中会获取不到需要的字段
+       */
+    cb(null, req.body.filename)
+  },
+})
+const singleUploaderHash = multer({ storage: storageHashName })
+
+// Single file upload with content hash filename
+router.post('/upload_single_name', singleUploaderHash.any(), (ctx) => {
+  if (!ctx.request.files) {
+    ctx.body = { code: 0, servicePath: '', codeText: 'upload error' }
+    return
   }
-}));
+  ctx.body = {
+    code: 0,
+    servicePath: `${HOSTNAME}:${SERVER_PORT}/${ctx.request.body.filename}`,
+    codeText: 'upload success',
+  }
+})
 ```
-
-- `koa-body` 的基本参数
-
-| 参数名     | 描述                                              | 类型             | 默认值         |
-| :--------- | :------------------------------------------------ | :--------------- | :------------- |
-| patchNode  | 将请求体打到原生 node.js 的`ctx.req`中            | Boolean          | `false`        |
-| patchKoa   | 将请求体打到 koa 的 `ctx.request` 中              | Boolean          | `true`         |
-| jsonLimit  | JSON 数据体的大小限制                             | String / Integer | `1mb`          |
-| formLimit  | 限制表单请求体的大小                              | String / Integer | `56kb`         |
-| textLimit  | 限制 text body 的大小                             | String / Integer | `56kb`         |
-| encoding   | 表单的默认编码                                    | String           | `utf-8`        |
-| multipart  | 是否支持 `multipart-formdate` 的表单              | Boolean          | `false`        |
-| urlencoded | 是否支持 `urlencoded` 的表单                      | Boolean          | `true`         |
-| text       | 是否解析 `text/plain` 的表单                      | Boolean          | `true`         |
-| json       | 是否解析 `json` 请求体                            | Boolean          | `true`         |
-| jsonStrict | 是否使用 json 严格模式，`true` 会只处理数组和对象 | Boolean          | `true`         |
-| formidable | 配置更多的关于 `multipart` 的选项                 | Object           | `{}`           |
-| onError    | 错误处理                                          | Function         | `function(){}` |
-| stict      | 严格模式,启用后不会解析 `GET, HEAD, DELETE `请求  | Boolean          | `true`         |
-
-- `formidable` 的相关配置参数
-
-| 参数名         | 描述                                         | 类型     | 默认值                  |
-| :------------- | :------------------------------------------- | :------- | :---------------------- |
-| maxFields      | 限制字段的数量                               | Integer  | `1000`                  |
-| maxFieldsSize  | 限制字段的最大大小                           | Integer  | `2 * 1024 * 1024`       |
-| uploadDir      | 文件上传的文件夹                             | String   | `os.tmpDir()`           |
-| keepExtensions | 保留原来的文件后缀                           | Boolean  | `false`                 |
-| hash           | 如果要计算文件的 hash，则可以选择 `md5/sha1` | String   | `false`                 |
-| multipart      | 是否支持多文件上传                           | Boolean  | `true`                  |
-| onFileBegin    | 文件上传前的一些设置操作                     | Function | `function(name,file){}` |
-
-- 获取文件上传后的信息
-
-```js
-router.post('/',async (ctx)=>{
-  console.log(ctx.request.files);  // 上传后文件的信息
-  console.log(ctx.request.body);  // 其他的表单字段
-  ctx.body = JSON.stringify(ctx.request.files);
-});
-```
-
-> 因为默认开启多个文件上传，因此 `ctx.request.files` 是一个对象，
->
-> 而且是通过表单的 `name=photo` 属性作为对象的 key,值便是一个 File 对象，有用的字段如下：
-
-| 字段名           | 描述             |
-| :--------------- | :--------------- |
-| size             | 文件大小         |
-| path             | 文件上传后的目录 |
-| name             | 文件的原始名称   |
-| type             | 文件类型         |
-| lastModifiedDate | 上次更新的时间   |
 
 ### Resize图片
 
