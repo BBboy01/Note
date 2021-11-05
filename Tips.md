@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 ## new 对象时进行的操作
 
-1. 在函数中获取到该函数的`Foo.prototype`对象（默认有`constructor`属性且`enumerable: false`，函数创建时便已经产生）
+1. 在函数中获取到该函数的(例)`Foo.prototype`对象（默认有`constructor: Foo`属性且`enumerable: false`，函数创建时便已经产生）
 2. 构造函数内部的`this`指向该对象
 3. 执行函数内部的代码（函数体代码）
 4. 如果构造函数没有返回非空对象，则返回创建出来的新对象
