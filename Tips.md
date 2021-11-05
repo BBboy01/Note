@@ -29,6 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 ```
 
+## new 对象时进行的操作
+
+1. 在函数中获取到该函数的`Foo.prototype`对象（默认有`constructor`属性且`enumerable: false`，函数创建时便已经产生）
+2. 构造函数内部的`this`指向该对象
+3. 执行函数内部的代码（函数体代码）
+4. 如果构造函数没有返回非空对象，则返回创建出来的新对象
+
 ## js判断当前页面是否被切换
 
 可以判断电脑桌面的切换、同一个浏览器中标签的切换，然而只要是非全屏状态的电脑应用切换不会触发
@@ -88,7 +95,7 @@ Object.assign(a, {a: 1, b: 4, c: 3})  // {a: 1, b: 4, c: 3}
 
 创建一个对象，使其上一层`__proto__`指向`obj1`
 
-`optionalProps`为可选的，不填写为`null`，可以填写属性描述符来为该对象声明值
+`optionalProps`为可选的，不填写为`null`，可以填写属性描述符来为该对象声明自身的值
 
 ```js
 const father = Object.create(Object.prototype, {
