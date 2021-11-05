@@ -61,6 +61,16 @@ document.addEventListener('visibilitychange', function () {
 });
 ```
 
+## 基本数据类型在JS中的大小
+
+### `String`: 2Bytes
+
+JavaScript 的字符串类型用于表示文本数据。它是**一组16位的无符号整数值的“元素”**。在字符串中的每个元素占据了字符串的位置。第一个元素的索引为 0，下一个是索引 1，依此类推。字符串的长度是它的元素的数量
+
+### `Number`: 8Bytes
+
+根据 ECMAScript 标准，JavaScript 中只有一种数字类型：**基于 IEEE 754 标准的双精度 64 位二进制格式的值**（-(2^53 -1) 到 2^53 -1）。**它并没有为整数给出一种特定的类型**。除了能够表示浮点数外，还有一些带符号的值：`+Infinity`，`-Infinity` 和 `NaN` (非数值，Not-a-Number)
+
 ## `Object`方法
 
 ### `assign`
