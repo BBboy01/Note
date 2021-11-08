@@ -298,6 +298,38 @@ function uniqueArr (array) {
 uniqueArr(a)
 ```
 
+## `generator`解决回调地狱
+
+```js
+function requestData(url) {
+    return new Promise((resolve, reject) => {
+        resolve()
+    })
+}
+
+async function getData() {
+    const res1 = yield requestData('why')
+    const res2 = yield requestData(res1 + '1')
+    const res3 = yield requestData(res2 + '2')
+    const res4 = yield requestData(res3 + '3')
+    const res5 = yield requestData(res4 + '4')
+    console.log(res5)
+}
+
+function execGen(genFn) {
+    function exec(res){
+        const result = genFn.next(res)
+        if (result.done) return result.value
+        result.value.then(r => {
+            exec(result.value)
+        })
+    } 
+    exec()
+}
+
+execGen(getData)
+```
+
 ## 移动端常用兼容`meta`
 
 ```html
