@@ -307,7 +307,7 @@ function requestData(url) {
     })
 }
 
-async function getData() {
+function* getData() {
     const res1 = yield requestData('why')
     const res2 = yield requestData(res1 + '1')
     const res3 = yield requestData(res2 + '2')

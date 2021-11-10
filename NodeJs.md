@@ -9,6 +9,26 @@
 | npm update --save            | yarn upgrade             |
 | npm install -g @vue/cli      | yarn global add @vue/cli |
 
+# `path.join`和`path.resolve`的区别
+
+```js
+// resolve 的默认路径为当前的工作目录
+// vscode 打开的工作目录为 C:\Users\11566\Desktop\test\path 文件的路径在 ./dio/
+path.resolve('a')  // C:\Users\11566\Desktop\test\path\dio\a
+
+// resolve 有多个参数时,如果第一个参数为 / 开头，会以第一个参数作为根路径
+path.resolve("/__dirname", "a")  // C:\__dirname\a
+console.log(path.resolve("__dirname", "a"));  // C:\Users\11566\Desktop\test\path\__dirname\a
+console.log(path.resolve("../__dirname", "a"))  // C:\Users\11566\Desktop\test\__dirname\a
+// join 只会做单纯的路径拼接
+console.log(path.join("/__dirname", "a"))  // \__dirname\a
+console.log(path.join("__dirname", "a"))  // __dirname\a
+```
+
+- `__dirname`为当前文件所在的绝对路径
+
+- `process.pwd()`为当前的工作目录的绝对路径
+
 # 相对路径坑爹Tip
 
 在项目中的任何一个地方的相对路径，都是相对于process.cwd()，即在哪一个文件夹启动的项目，process.cwd()就是哪个目录
