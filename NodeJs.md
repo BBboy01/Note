@@ -43,6 +43,43 @@ process.env.isProduction = isProduction
 console.log(!!process.env.isProduction, typeof process.env.isProduction)  // true string
 ```
 
+## 导包与引入包时发生了什么
+
+```js
+// a.js
+const a = {
+    b: 1,
+    c: 2
+}
+
+module.exports = a
+exports.d = 3
+```
+
+
+
+```js
+// b.js
+const moduleA = require('./a')
+/*
+	{
+		b: 1,
+		c: 2,
+		d: 3
+	}
+*/
+```
+
+- b中`require`相当于将`'./a'`当作包的路径去加载对应的包
+
+- `a.js`中会先执行`module.exports = xxx`
+  - 之后会`exports = module.exports`进行对`module.exports`的扩展
+  - 最后会导出`module.exports`
+
+- 之后将`a.js`中导出的`a`对象赋值给`b.js`中的`moduleA`
+
+- 即当`a.js`中的值发生改变时，`moduleA`也会发生改变
+
 # Express
 
 ## 简易的搭建后台服务
