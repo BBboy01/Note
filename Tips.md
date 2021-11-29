@@ -484,7 +484,7 @@ div{ height: 2rem; }
 - flex为`flex-grow、flex-shrink、flex-basic`的缩写，默认值为 0 1 auto
   - flex: auto (1 1 auto)
   - flex: 0 (0 0 0)
-  - flex: 1 (1 1 auto)
+  - flex: 1 (1 1 0)
   - flex: none (0 0 auto)
 
 - flex-grow
