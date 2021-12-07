@@ -1,4 +1,4 @@
-## 使用`rem`时获取屏幕宽度
+## **使用**`rem`时获取屏幕宽度
 
 ```js
 document.documentElement.style.fontSize = document.documentElement.clientWidth / 37.5 + 'px'
@@ -35,6 +35,25 @@ document.addEventListener('DOMContentLoaded', () => {
 2. 构造函数内部的`this`指向该对象
 3. 执行函数内部的代码（函数体代码）
 4. 如果构造函数没有返回非空对象，则返回创建出来的新对象
+
+## `webpack` 自动导入模块
+
+`require.context(path, withChildPath, fileNameReg)`
+
+- path: String 需要导入模块的目录
+- withChildPath: Boolean 是否包含子目录
+- fileNameReg: RegExp 需要导入模块的文件名的正则
+
+```js
+const requireComponents = require.context('./modules', false, /\.(vue|js|jsx|ts|tsx)$/)
+// requireComponents.keys()  // 返回匹配到的文件名
+const components = {}
+requireComponents.keys().forEach(filePath => {
+    components[_.upperFirst(_.camelCase(filePath.replace(/\.(vue|js|jsx|ts|tsx)/, '').replace('/\.\//', '')))] = requireComponents(filePath).default  // 以大驼峰式组件名对应模块中默认导出的内容
+})
+
+export default components
+```
 
 ## js判断当前页面是否被切换
 
