@@ -293,3 +293,7 @@ git commit -m 'gitignore updated'
 git push
 ```
 
+## 配置 `commitizen`
+
+1. 下载 `npm install -g commitizen cz-conventional-changelog`
+2. 配置 `echo '{ "path": "cz-conventional-changelog" }' > ~/.czrc`
