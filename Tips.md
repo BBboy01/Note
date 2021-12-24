@@ -947,6 +947,19 @@ Object.setPrototypeOf(arr, Fn.prototype)
 console.log(arr instanceof Fn)  // false
 ```
 
+## `npm` 命令行进行版本控制
+
+```bash
+# 增加一个修复版本号: 1.0.1 -> 1.0.2 (自动更改 package.json 中的 version 字段)
+npm version patch
+
+# 增加一个小的版本号: 1.0.1 -> 1.1.0 (自动更改 package.json 中的 version 字段)
+npm version minor
+
+# 将更新后的包发布到 npm 中
+npm publish
+```
+
 ## 对象和数字比较的隐式转换
 
 对象 == 数字  默认把对象转换为数字
