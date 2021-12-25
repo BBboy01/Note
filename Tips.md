@@ -8,6 +8,16 @@ document.documentElement.style.fontSize = document.documentElement.clientWidth /
 // 这样就实现了屏幕越大像素值越大，完成了适配
 ```
 
+## 获取物理像素
+
+```js
+const screenWidth = screen.width
+const screenHeight = screen.height
+const dpr = window.devicePixelRatio
+const physicalWidth = screenWidth * dpr
+const physicalHeight = screenHeight * dpr
+```
+
 ## 将数组中`false、undefined、null、0`之类的隐式为`false`的类型的数据过滤掉
 
 ```js
