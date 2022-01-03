@@ -18,6 +18,10 @@ const physicalWidth = screenWidth * dpr
 const physicalHeight = screenHeight * dpr
 ```
 
+## CSS 选择器优先级
+
+![specifishity](https://gitee.com/RealBBboy/mark-down-images-repo/raw/master/NoteImg/specifishity.png)
+
 ## 将数组中`false、undefined、null、0`之类的隐式为`false`的类型的数据过滤掉
 
 ```js
@@ -63,6 +67,53 @@ requireComponents.keys().forEach(filePath => {
 })
 
 export default components
+```
+
+## 添加锚点
+
+原理：改变 URL 的 hash 值时不会刷新页面，同时可以监听到 `hashchange` 的事件
+
+```js
+window.addEventListener('hashchange', function(e) {
+  console.log(e.oldURL);
+  console.log(e.newURL);
+}, false);
+```
+
+- 通过点击 `a 标签`
+
+```html
+<a href="#a01">页面滚动到 id = 'a01' 的元素的位置</a>
+
+<p>练习1</p>
+<p id="a01">练习2</p>
+<p>练习3</p>
+```
+
+- 通过 `a 标签` 的 name 属性直接改变 URL 的 hash 值
+
+```html
+<!-- bbboy.top#dio -->
+<p>练习1</p>
+<p>练习2</p>
+<a name="dio"></a>
+<p>练习3</p>
+<p>练习4</p>
+<p>练习5</p>
+<p>练习6</p>
+```
+
+- 通过标题标签 `h1 h2 ...` 的 id 属性直接改变 URL 的 hash 值
+
+```html
+<!-- bbboy.top#dio -->
+<p>练习1</p>
+<p>练习2</p>
+<h1 id="dio"></h1>
+<p>练习3</p>
+<p>练习4</p>
+<p>练习5</p>
+<p>练习6</p>
 ```
 
 ## js判断当前页面是否被切换
