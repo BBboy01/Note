@@ -515,7 +515,7 @@ html {
 
 ## 数组扁平化
 
-`Array.prototype.concat`会将多个变量中的一层数组展开并添加到目标中
+- `Array.prototype.concat`会将多个变量中的一层数组展开并添加到目标中
 
 ```js
 const arr = [1,2,3,4,[2,5,1,[2,31,5], 2,7],9,1,[0,1],8]
@@ -540,6 +540,15 @@ function flatten (array) {
     	}
 }
 ```
+
+- 数组内置方法 `flat`
+
+```js
+// Array.prototype.flat(n)  n 表示需要拍平多少层 如果不论多少层都直接拍平可以使用 Infinity
+[1,2,3,4,[2,5,1,[2,31,5], 2,7],9,1,[0,1],8].flat(Infinity)  // [1, 2, 3, 4, 2, 5, 1, 2, 31, 5, 2, 7, 9, 1, 0, 1, 8]
+```
+
+- 递归实现
 
 ```js
 Array.prototype.flatten = function () {
