@@ -148,6 +148,15 @@ document.addEventListener('visibilitychange', function () {
 });
 ```
 
+## Ajax 请求放在 mounted 中的原因
+
+- 异步请求放在 created 中（流程混乱）：
+	-  created -> API 请求 -> 组件重新渲染
+	-                -> mounted -> 组件首次渲染
+- 异步请求放在 mounted 中（流程清晰）：
+	- created -> mounted -> 组件首次渲染 -> API请求 -> 组件重新渲染
+created 和 mounted 的执行过程是同步的，也就是说只有 created 和 mounted 中的同步代码执行完毕后才会执行 created 中的异步代码。
+
 ## 基本数据类型在JS中的大小
 
 ### `String`: 2Bytes
