@@ -120,3 +120,11 @@ then
 fi
 ```
 
+# 加载 `oh-my-posh` 配置
+1. 确认 `oh-my-posh` 已经在环境变量中：
+	1. 在命令行中直接输入 `oh-my-posh -version`，如果找不到则需要添加到环境变量中
+2. 创建/编辑 .bashrc 文件 `vim ~/.bashrc`
+```bash
+eval "$(oh-my-posh --init --shell bash --config oh-my-posh主题json文件的路径)"
+```
+3. 重载 .bashrc 的新配置 `source ~/.bashrc`

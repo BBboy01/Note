@@ -28,3 +28,10 @@ User root
 ```
 
 然后便可以通过`ssh nickname`别名登录服务器了
+
+# 添加**心跳**避免长时间不操作导致断开
+`vim ~/.ssh/config`
+```bash
+Host *
+	ServerAliveInterval 60
+```
