@@ -116,6 +116,13 @@ window.addEventListener('hashchange', function(e) {
 <p>练习6</p>
 ```
 
+## 子域名共享父域名中的 Cookie
+
+由于浏览器为了保护用户安全而建立的 CORS 协议，一般情况下违反了该协议时发送的跨域请求会被浏览器拦截，但是当两个域名处于父子的关系时，通过后端设置响应头 `Set-Cookie: name=value; domain=topDomain.com`，即设置 `domain` 字段为顶级域名时，子域名可以共享父域名的 Cookie
+![顶级/二级/三级域名&父/子域名](https://i0.hdslb.com/bfs/article/ace3488847dc77e77cc167985312bc54213ece40.png@900w_261h_progressive.webp)
+- 有「二级域名」 能读取设置了domain为顶级域名或者自身的cookie，不能读取其他二级域名domain的cookie。例如：要想cookie在多个二级域名中共享，需要设置domain为顶级域名，这样就可以在所有二级域名里面获取到这个cookie的值了
+- 「顶级域名」 只能获取到domain设置为顶级域名的cookie，domain设置为其他子级域名的无法获取
+
 ## js判断当前页面是否被切换
 
 可以判断电脑桌面的切换、同一个浏览器中标签的切换，然而只要是非全屏状态的电脑应用切换不会触发
