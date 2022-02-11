@@ -479,6 +479,23 @@ const el = document.querySelector("#dio")
 el.dataset.sizing  // 12
 ```
 
+## HTML 获取元素 `data-xxx` 中的内容
+
+一般在元素自身的 `data-xxx` 属性可以在该元素自身的伪元素中直接通过 CSS 的 `attr(data-xxx)` 获取到其内容来设置 `content` 属性
+
+```html
+<section class="section" data-dio='the content of section'>
+	Common Element
+</section>
+```
+
+```css
+.section::after {
+	content: arrt(data-dio);
+	background-color: #333;
+}
+```
+
 ## JS监听元素CSS`transition`结束
 
 ```js
