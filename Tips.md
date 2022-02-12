@@ -187,6 +187,10 @@ JavaScript 的字符串类型用于表示文本数据。它是**一组16位的�
 ```js
 const a = Object.assign({}, {a: 1, b: 2})  // {a: 1, b: 2}
 Object.assign(a, {a: 1, b: 4, c: 3})  // {a: 1, b: 4, c: 3}
+
+// 同时会改变原对象
+const b = { a: 1, b: 2}
+Object.assign(b, { c: 3 }) === b  // true
 ```
 
 ### `create`
