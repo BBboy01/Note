@@ -554,6 +554,40 @@ html {
 - `unset` 清除不能继承的样式，通常与 `all` 联用重置样式，使其与 `span` 的效果一样
 - `revert` 设置该样式为浏览器对该元素默认的样式
 
+## 读取图片 Blob 实现图片预览
+
+- URL.createObjectURL(file)
+
+```javascript
+let fileBlobPath
+try {
+	fileBlobPath = URL.createObjectURL(file)
+} catch (e) {
+	console.log(e)
+}
+```
+
+- FileReader.readAsDataURL(file)
+
+```javascript
+const fileReader = new FileReader()
+fileReader.readAsDataURL(file)
+fileReader.addEventListener('load', () => {
+	const fileBase64String = fileReader.result 
+})
+```
+
+- 异同：
+	- 返回值：
+		- FileReader.readAsDataURL(file) 可以得到一段 base64 的字符串
+		- URL.createObjectURL(file) 可以得到当前文件的一个内存 URL
+	- 执行机制：
+		- FileReader.readAsDataURL(file) 通过回调的形式返回结果，异步执行
+		- URL.createObjectURL(file) 直接返回，直接执行
+	- 内存清理
+		- FileReader.readAsDataURL(file) 依照 JS 垃圾回收机制自动从内存中清理
+		- URL.createObjectURL(file) 存在于当前 document 内，清除方式只有 unload 事件或 revokeObjectURL 手动清除
+
 ## 数组扁平化
 
 - `Array.prototype.concat`会将多个变量中的一层数组展开并添加到目标中
