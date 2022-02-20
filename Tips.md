@@ -665,9 +665,12 @@ div{ height: 2rem; }
 
 - flex为`flex-grow、flex-shrink、flex-basic`的缩写，默认值为 0 1 auto
   - flex: auto (1 1 auto)
-  - flex: 0 (0 0 0)
-  - flex: 1 (1 1 0)
   - flex: none (0 0 auto)
+  - flex: initial (0 1 auto)
+  - flex: 1 (flex-grow: 1)
+  - flex: 1px (flex-basis: 1px)
+  - flex: 1 1 (flex-grow: 1; flex-shrink: 1)
+  - flex: 1 1px (flex-grow: 1; flex-basis: 1)
 
 - flex-grow
   - 当父元素flex方向为row时子元素没占满父元素宽度时
