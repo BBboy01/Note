@@ -947,7 +947,7 @@ Koa中`next`的实现是返回`Promise`的，所以可以`await next()`来等待
 - display=none 时，隐藏的元素不会占据之前的位置；而 visibility=hidden 时，隐藏的元素会占据之前的位置
 - 当 visibility=hidden 时，子元素可以通过设置 visibility=visible 显示；而 display=none 时则无法通过任何途径显示子元素
 - visibility=hidden 不会影响计数器的结果(例如 `ul -> li` )，而 display=none 会使计数器直接忽略这个元素
-- display=none 无法通过 animation 设置动画，而 visibility=hidden 可以
+- display=none 无法通过 animation 设置动画，而 visibility=hidden 可以(建议通过高性能的 opacity 来实现隐藏显示动画)
 
 ## 前端项目在git操作之前执行命令
 
