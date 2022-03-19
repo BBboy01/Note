@@ -1,14 +1,3 @@
-# npm yarn命令对比
-
-| npm                          | yarn                     |
-| ---------------------------- | ------------------------ |
-| npm init -y                  | yarn init -y             |
-| npm install 包名 --save      | yarn add 包名            |
-| npm uninstall react --save   | yarn remove react        |
-| npm install react --save-dev | yarn add react --dev     |
-| npm update --save            | yarn upgrade             |
-| npm install -g @vue/cli      | yarn global add @vue/cli |
-
 # `path.join`和`path.resolve`的区别
 
 ```js
