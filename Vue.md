@@ -71,6 +71,14 @@ props: {
 
 当给组件传递自定义属性时，未在组件的 `props` 中声明该属性，则该属性会被添加到组件的 `arrts` 属性中，并且是**非响应式的**
 
+## ctx.expose
+
+当子组件中的 `setup` 中返回了一些组件的方法，在父组件中，可以使用 `ref` 的方式获取到组件实例，从而可以通过该实例**直接调用子组件的所有方法**，然而这是可以被避免的：
+
+在子组件 `setup` 的第二个参数 `ctx` 中有 `expose` 方法，使用该方法可以指定哪些方法可以直接原名绑定到当前组件实例中，可以传递数组：`expose: ['method1', 'method2']`
+
+在 `<script setup>` 语法中，子组件的方法是默认关闭的，即无法在父组件中通过 `ref` 的方式直接访问，需要通过 `defineExpose` 方法进行暴露：`defineExpose({method1, method2})`
+
 # eventBus
 
 `yarn add mitt`
