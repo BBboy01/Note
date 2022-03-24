@@ -67,6 +67,10 @@ props: {
 }
 ```
 
+## attrs
+
+当给组件传递自定义属性时，未在组件的 `props` 中声明该属性，则该属性会被添加到组件的 `arrts` 属性中，并且是**非响应式的**
+
 # eventBus
 
 `yarn add mitt`
@@ -507,20 +511,6 @@ const AsyncHomeComponentMethod2 = defineAsyncComponent({
     transition: transform 1s ease;
   }
 </style>
-```
-
-# :data-index属性
-
-为元素添加`dataset`属性，并将值赋给该属性
-
-```vue
-<template v-for="(item, index) in arr">
-	<h1 :data-index="index">
-    	Hello World
-	</h1>
-</template>
-
-console.log(el.dataset.index)
 ```
 
 
