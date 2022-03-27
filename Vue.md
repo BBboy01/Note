@@ -566,7 +566,7 @@ watch([() => ({ info }), slogen], ([newInfoVal, newSloganVal], [oldInfoVal, oldS
 
 ```js
 {
-    path: "/:pathMetch(.*)",
+    path: "/:pathMatch(.*)",
     component: () => import("../pages/NotFound.vue")
 }
 ```

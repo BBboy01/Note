@@ -123,6 +123,10 @@ window.addEventListener('hashchange', function(e) {
 - 有「二级域名」 能读取设置了domain为顶级域名或者自身的cookie，不能读取其他二级域名domain的cookie。例如：要想cookie在多个二级域名中共享，需要设置domain为顶级域名，这样就可以在所有二级域名里面获取到这个cookie的值了
 - 「顶级域名」 只能获取到domain设置为顶级域名的cookie，domain设置为其他子级域名的无法获取
 
+## `position: fixed` 的位置 `top、bottom、left、right`
+
+当元素的 `position` 属性为 `fixed` 时，会创建层叠上下文，此时该元素的位置 `top、bottom、left、right` 是相对于祖先中第一个属性 `transform || perspective || filter` 不是 `none` 的元素进行定位的
+
 ## 不使用 `console.log` 直接输出对象
 
 使用 HTML5 的 `<pre>content</content>` 标签可以直接将对象数据展示在网页中
