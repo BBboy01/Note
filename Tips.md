@@ -131,6 +131,40 @@ window.addEventListener('hashchange', function(e) {
 
 使用 HTML5 的 `<pre>content</content>` 标签可以直接将对象数据展示在网页中
 
+## `Array.fill` 对于非基础数据类型
+
+对于非基础类型，直接使用 `fill` 填入，会是相同的地址引用。
+建议改为 `Array(5).fill().map(_ => [])`
+
+```javascript
+
+const dp = Array(5).fill(Array(3).fill(false))
+
+dp
+
+1.  (5) [Array(3), Array(3), Array(3), Array(3), Array(3)]
+
+1.  0: (3) [true, false, false]
+2.  1: (3) [true, false, false]
+3.  2: (3) [true, false, false]
+4.  3: (3) [true, false, false]
+5.  4: (3) [true, false, false]
+6.  length: 5
+7.  [[Prototype]]: Array(0)
+
+dp[0][0] = true
+
+1.  (5) [Array(3), Array(3), Array(3), Array(3), Array(3)]
+
+1.  0: (3) [true, false, false]
+2.  1: (3) [true, false, false]
+3.  2: (3) [true, false, false]
+4.  3: (3) [true, false, false]
+5.  4: (3) [true, false, false]
+6.  length: 5
+7.  [[Prototype]]: Array(0)
+```
+
 ## js判断当前页面是否被切换
 
 可以判断电脑桌面的切换、同一个浏览器中标签的切换，然而只要是非全屏状态的电脑应用切换不会触发
