@@ -137,7 +137,6 @@ window.addEventListener('hashchange', function(e) {
 建议改为 `Array(5).fill().map(_ => [])`
 
 ```javascript
-
 const dp = Array(5).fill(Array(3).fill(false))
 
 dp
@@ -163,6 +162,19 @@ dp[0][0] = true
 5.  4: (3) [true, false, false]
 6.  length: 5
 7.  [[Prototype]]: Array(0)
+```
+
+## 监听错误
+`Promise` 错误
+
+如果未在 `reject` 里指定信息，则 `PromiseResult -> message` 会提示具体错误信息，否则只会在 `PromiseResult` 中显示 `reject` 的信息
+```javascript
+window.addEventListener('unhandledrejection', e => e, true)
+```
+
+一般错误
+```javascript
+window.addEventListener('error', e => e, true)
 ```
 
 ## js判断当前页面是否被切换
@@ -204,7 +216,7 @@ document.addEventListener('visibilitychange', function () {
 	-                -> mounted -> 组件首次渲染
 - 异步请求放在 mounted 中（流程清晰）：
 	- created -> mounted -> 组件首次渲染 -> API请求 -> 组件重新渲染
-created 和 mounted 的执行过程是同步的，也就是说只有 created 和 mounted 中的同步代码执行完毕后才会执行 created 中的异步代码。
+	created 和 mounted 的执行过程是同步的，也就是说只有 created 和 mounted 中的同步代码执行完毕后才会执行 created 中的异步代码。
 
 ## 基本数据类型在JS中的大小
 
