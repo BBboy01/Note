@@ -164,7 +164,52 @@ dp[0][0] = true
 7.  [[Prototype]]: Array(0)
 ```
 
+## `performance` 中的各种时间以及指标监控
+
+```javascript
+const {
+  fetchStart,
+  connectStatr,
+  connectEnd,
+  requestStart,
+  resonseStart,
+  responseEnd,
+  domLoading,
+  domInteractive,
+  domContentLoadedEventStart,
+  domContentLoadedEventEnd,
+  loadEventStart
+} = performance.timing
+
+const time = {
+  connectTime: connectEnd - connectStart,  // 连接时间
+  ttfbTime: responseStart - requestStart,  // 首字节到达时间
+  responseTime: responseEnd - reponseStart,  // 响应的读取时间
+  parseDOMTime: loadEventStart - domLoading,  // DOM 解析时间
+  DOMContentLoadedTime: domContentLoadedEventEnd - domContentLoadedEventStart,  // DOM 加载时间
+  timeToInteractiveTime: domInteractive - fetchStart,  // 首次可交互时间
+  loadTime: loadEventStart - fetchStart  // 完整的加载时间
+}
+
+// FMP 所对监控的元素需要有 `elementtiming= meaningful` 的属性
+
+let FMP, LCP
+
+new PerformanceObserver((entryList, observer) => {
+  const perfEntry = entryList[0]
+  FMP = perfEntry
+  observer.disconnect()
+}).observe({ entryTypes: ['element'] })  // 观察页面中的意义元素
+
+new PerformanceObserver((entryList, observer) => {
+  const perfEntry = entryList[0]
+  LCP = perfEntry
+  observer.disconnect()
+}).observe({ entryTypes: ['largest-contentful-paint'] })  // 观察页面中的z元素
+```
+
 ## 监听错误
+
 `Promise` 错误
 
 如果未在 `reject` 里指定信息，则 `PromiseResult -> message` 会提示具体错误信息，否则只会在 `PromiseResult` 中显示 `reject` 的信息
