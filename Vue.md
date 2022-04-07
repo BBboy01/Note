@@ -16,7 +16,7 @@ Vue将被侦听的数组的变更方法进行了包裹，所以它们也会触�
 - slice()
 - concat()
 
-# v-model中的修饰符
+# v-model
 
 - `.lazy`修饰符
 
@@ -33,6 +33,34 @@ Vue将被侦听的数组的变更方法进行了包裹，所以它们也会触�
 - `.trim`修饰符
 
 可以删除输入值前后的空格
+
+使用自定义修饰符时会向子组件中传入 `modelModifiers` 的 `props`：
+
+```typescript
+// 父组件
+<child-component v-mode.diy="callback" v-mode:title.dio="callback2"/>
+
+// 子组件
+type PropsType = {
+  modelModifiers?: {
+    diy: boolean
+  },
+  titleModifiers?: {
+		dio: boolean
+	}
+}
+
+const propsData = defineProps<PropsType>()
+```
+
+`v-model` 是 `props` 和 `emits` 的语法糖，默认值为：
+
+|       | Vue2  |       Vue3        |
+| :---: | :---: | :---------------: |
+| props | value |    modelValue     |
+| emits | input | update:modelValue |
+
+`v-mode` 同时可以自定义 `props` 和 `emits` 的名称：`v-mode:name=callback`，子组件中 `props: name`，`emits: update:name`
 
 # props接收值
 
