@@ -1563,6 +1563,24 @@ app.use(async (ctx) => {
 
 ## 获取请求体（POST参数）
 
+> 为什么需要这个插件而非直接获取 POST 请求中 body 中的内容？
+>
+> 因为 body 中的内容是通过 `Stream` 的方式传输的,因此,需要对数据进行二进制转换
+>
+> ```javascript
+> const reqData = []
+> 
+> req.on('data', (data) => {
+>   reqData.push(data)
+> })
+> 
+> req.on('end', () => {
+>   const data = Buffer.concat(reqData).toString()
+> })
+> ```
+>
+> 
+
 ### 解析`json`、`urlencoded`数据
 
 - 安装 `koa-bodyparser`
