@@ -123,13 +123,78 @@ window.addEventListener('hashchange', function(e) {
 - 有「二级域名」 能读取设置了domain为顶级域名或者自身的cookie，不能读取其他二级域名domain的cookie。例如：要想cookie在多个二级域名中共享，需要设置domain为顶级域名，这样就可以在所有二级域名里面获取到这个cookie的值了
 - 「顶级域名」 只能获取到domain设置为顶级域名的cookie，domain设置为其他子级域名的无法获取
 
+## 隐式转换与显式转换
+
+### Number([val])
+
+- 一般用于浏览器的隐式转换中
+  - 数学运算
+  - isNaN 检测
+  - == 比较
+- 规则
+  - 字符串转换为数字：空字符串变为 0，如果出现任何非有效数字字符，结果都是 NaN
+  - 把布尔转换为数字：true -> 1，false -> 0
+  - null -> 0，undefined -> NaN
+  - Symbol 无法转换为数字，并且会报错
+  - BigInt 去除 'n' （超过安全数字的，会按照科学计数法处理）
+  - 把对象转换为数字的方法：
+    - 如果对象存在 `Symbol.toPrimitive` 方法，则先调用该方法
+    - 如果对象的 `valueOf` 方法获取到的值是原始值，则直接转换
+    - 调用对象的 `toString` 方法转换为字符串，再把字符串基于 `Number` 转换为数字
+
+#### parseInt([val], [radix]) parseFloat([val])
+
+- 一般用于手动转换
+- 规则：
+  - [val] 的值必须是一个字符串，如果不是则先转换为字符串
+  - 然后从字符串左边第一个字符开始找基于 [radix] 合法的数字字符，把找到的所有的有效数字字符按照 [radix] 转换为数字（如果没有则返回 NaN）
+  - 遇到一个非有效数字字符，不论后面是否还有有效数字字符都不再接着找
+  - parseFloat 可以多识别一个小数点
+
+```js
+const arr = [27, 2, 0, '0013', '14px', 123, 0022]
+const res = arr.map(parseInt)  // [27, NaN, 0, 1, 1, 38, 1]
+/** 
+*	27 -> parseInt(27, 0) -> parseInt(27, 10) -> 17
+*	2 -> parseInt(2, 1) -> parseInt('', 1) -> NaN
+* 0 -> parseInt(0, 2) -> 0
+*	'0013' -> parseInt('0013', 3) -> parseInt('001', 1) -> 1
+* '14px' -> parseInt('14px', 4) -> parseInt('14', 4) -> 1
+* 123 -> parseInt(123, 5) -> 38
+* 0022 -> parseInt(0022, 6) -> parseInt(parseInt(parseInt(0022, 8), 10), 6) -> 1
+*/
+```
+
+### Srting([val])
+
+- 转换规则：
+  - 拿字符串包起来
+  - 特殊：Object.prototype.toString
+- 出现情况：
+  - String([val]) 或者 [val].toString()
+  - '+' 除数学运算外，还可能表示字符串拼接
+    - 有两边，一边是字符串
+    - 有两边，一边是对象
+    - 只出现在左边
+
+### Boolean([val])
+
+- 转换规则：除了 `0 NaN '' null undefined` 为 false，其余的都是 true
+
+### "==" 比较
+
+- "==" 相等，两边数值类型不同，需要先转为相同类型，然后再进行比较
+  - 对象 == 字符串，对象转字符串 `Symbol.toPrimitive -> valueOf -> toString`
+  - null == undefined -> true  **null/undefined 和其他任何值都不相等**
+  - null === undefined -> false
+  - 对象 == 对象 比较的是堆内存的地址
+  - NaN == NaN -> false
+  - 除了以上情况，只要两边的类型不一致，剩下的都是转换为数字，然后再进行比较的
+  - === 绝对相等，如果两边类型不同则直接就是 false，不会转换数据类型
+
 ## `position: fixed` 的位置 `top、bottom、left、right`
 
 当元素的 `position` 属性为 `fixed` 时，会创建层叠上下文，此时该元素的位置 `top、bottom、left、right` 是相对于祖先中第一个属性 `transform || perspective || filter` 不是 `none` 的元素进行定位的
-
-## 不使用 `console.log` 直接输出对象
-
-使用 HTML5 的 `<pre>content</content>` 标签可以直接将对象数据展示在网页中
 
 ## `Array.fill` 对于非基础数据类型
 
@@ -1235,20 +1300,6 @@ console.log(a == 1 && a == 2 && a == 3)  // true
 import { ElButton, ElTabs, ElForm, ElInput } from 'element-plus'
 import { ElTabPane } from 'element-plus/lib/components/tabs'
 import { ElFormItem } from 'element-plus/lib/components/form'
-```
-
-## `&&`、`||`逻辑操作符
-
-通常情况下，`exp1 && exp2`，当 exp1 可以被转化为逻辑 true 时， 则返回 exp2，否则返回 exp1
-
-`exp1 || exp2`，当 exp1 可以被转化为逻辑 true时， 返回 exp1，否则返回 exp2
-
-```js
-const a = null;
-const b = undefined;
-const c = a || b;
-const d = a && b;
-console.log(c, d);  // undefined null
 ```
 
 ## `z-index`与元素层级
