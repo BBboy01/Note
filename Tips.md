@@ -173,9 +173,18 @@ const res = arr.map(parseInt)  // [27, NaN, 0, 1, 1, 38, 1]
 - 出现情况：
   - String([val]) 或者 [val].toString()
   - '+' 除数学运算外，还可能表示字符串拼接
+  - 如果属于字符串拼接，则按照 `Symbol.toPrimitive -> valueOf -> toString` 的规则转化
+    - 其中 Symbol.toPrimitive 方法会传入 `string、number、default` 三种参数，根据当前进行的是加法还是字符串拼接决定
     - 有两边，一边是字符串
     - 有两边，一边是对象
     - 只出现在左边
+
+```js
+const result = 100 + true + 21.2 + null + undefined + 'Tencetn' + [] + null + 9 + false
+console.log(result)  // 'NaNTencentnull9false'
+```
+
+
 
 ### Boolean([val])
 
