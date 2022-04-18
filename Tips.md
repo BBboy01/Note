@@ -180,6 +180,26 @@ const res = arr.map(parseInt)  // [27, NaN, 0, 1, 1, 38, 1]
     - 只出现在左边
 
 ```js
+// for example the following code
+value1 + value2
+// is equivalent to 
+toPrimitive(value1) + toPrimitive(value2)
+// where toPrimitive is 
+function toPrimitive(val) {
+  if (isPrimitive(val)) return val
+  if (isObject(val)) {
+    let v = val.valueOf()
+    if (isPrimitive(v)) return v
+  }
+  let s = val.toString()
+  if (isPrimitive(s)) return s
+  throw new TypeError
+}
+
+// while in a typed language, add will simply be several hardware instructions
+```
+
+```js
 const result = 100 + true + 21.2 + null + undefined + 'Tencetn' + [] + null + 9 + false
 console.log(result)  // 'NaNTencentnull9false'
 ```
