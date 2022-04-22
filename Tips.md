@@ -22,16 +22,6 @@ const physicalHeight = screenHeight * dpr
 
 ![specifishity](https://gitee.com/RealBBboy/mark-down-images-repo/raw/master/NoteImg/specifishity.png)
 
-## 将数组中`false、undefined、null、0`之类的隐式为`false`的类型的数据过滤掉
-
-```js
-const arr = [true, "aaa", null, "bbb", undefined, "ccc", false, "ddd", 0]
-console.log(arr)  // [true, "aaa", null, "bbb", undefined, "ccc", false, "ddd"]
-
-const newArr = arr.filter(Boolean)
-console.log(newArr)  // [true, "aaa", "bbb", "ccc", "ddd"]
-```
-
 ## `load`和`ready`的区别
 
 ```js
