@@ -688,7 +688,11 @@ el.addEventListener('transitionend', (e) => console.log('transition end'))
 
 ## CSS中的`@import`机制
 
-`@import`会在页面加载完毕后再加载
+@import 会将加载的 CSS 应用到样式文件的最顶层，即层叠优先级最高
+
+对于请求阻塞问题，请求阻塞并不是 @import 的问题，而是 CSS 本身的问题，页面渲染的性质要求样式必须提前加载完毕，且要保证顺序
+
+至于重复请求，对于同一个页面，只要不存在 N 个 CSS 指向同一个 CSS 模块的场景，@import 就不会有这个的问题
 
 ```css
 /* style.css */
@@ -724,7 +728,22 @@ html {
 }
 ```
 
-**即`@import`的内容会被编译到最上面**
+同时支持 layer 指定 layer 名称
+
+```html
+@import './zxx.lib.css' layer(lay);
+```
+
+对于第三方样式文件，则可以使用 layer 指定名称的方式来调整优先级
+
+```html
+layer lay1, lay2;
+@import './lay1.css' layer(lay1);
+@layer lay2 {
+
+}
+</ 此时 lay1 的层叠优先级比 lay2 高，即 lay2 中的样式优先级更高 -->
+```
 
 ## CSS 全局属性关键字
 
