@@ -234,22 +234,22 @@ gti mergetool
 - 项目配置文件：项目/.git/config
 
     ```git
-    git config --local user.name = 'BBboy'
-    git config --local user.name = 'BBboy@xx.com'
+    git config --local user.name BBboy
+    git config --local user.name BBboy@xx.com
     ```
 
 - 全局配置文件：~/.gitconfig
 
     ```git
-    git config --global user.name = 'BBboy'
-    git config --global user.name = 'BBboy@xx.com'
+    git config --global user.name BBboy
+    git config --global user.name BBboy@xx.com
     ```
 
 - 系统配置文件：/etc/.gitconfig
 
     ```git
-    git config --system user.name = 'BBboy'
-    git config --system user.name = 'BBboy@xx.com'
+    git config --system user.name BBboy
+    git config --system user.name BBboy@xx.com
     
     注意：需要有root权限
     ```
