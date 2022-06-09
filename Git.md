@@ -1,5 +1,53 @@
 # 基础
 
+## `.git`目录
+
+### `objects`
+
+用于存放 git 暂存区和本地仓库的内容
+
+`objects` 文件夹中所有文件的类型（使用 `git cat-files -t` 查看文件类型，`git cat-files -p` 查看文件内容）：
+
+- tree 存放本次提交的所有 文件名称/文件夹名称 以及这些 文件/文件夹名称 对应的 hash
+- commit 存放项目作者以及更改者的信息、更改时间戳和时区，同时有该提交的 commit message 和对应的 tree hash（如果是在一次提交之后提交，则还会有 parent commit hash)
+- blob 存放文件内容
+
+当存储暂存区中的内容时，会以 sha1 算法将 `blob 文件内容长度\0文件内容` 进行编码生成一个160位的二进制 hash，第一个字节作为文件夹名称，后面的 hash 值作为文件名称，其中存储二进制形式的文件内容
+
+## `index`
+
+`git fs-files -s`
+
+存放本地库中所有文件的相对于 git 目录的文件 URL 和 hash
+
+## `HEAD`
+
+存放所处分支的信息
+
+例如当 `git switch dev` 后，`cat .git/HEAD` 会输出 `refs/heads/dev`，此时 `cat .git/refs/heads/dev` 便会显示当前分支的最新一次 commit hash
+
+当 `git switch master` 后，`cat .git/HEAD` 会输出 `refs/heads/master`
+
+## HEAD 和 branch 指针
+
+git 中有 HEAD 和 branch 两个指针，HEAD 用来指向当前所在的 commit hash，通常是指向分支指针而分支指针又指向它的最新一次 commit hash，因此当 HEAD 指向分支指针时相当于间接指向了一个 commit hash；branch 则是分支指针，指向当前分支最新的一次 commit hash
+
+当 HEAD 指向的不是 branch 指针而是具体的 commit hash 时，也可以进行 add 和 commit 操作，并且此时执行 `git checkout -b xxx` 会直接将 HEAD 所指向的 commit hash 也由新创建的分支所指向
+
+## 本地仓库添加远程仓库
+
+`git remote add origin 仓库URL` origin 为自己起的远程仓库别名
+
+当执行完该命令后，本地 .git/config 会多一条远程仓库的配置
+
+```git
+[remote "origin"]
+				url = 远程仓库UIL
+				fetch = +refs/heads/*:refs/remotes/origin/* 本地分支与远程分支文件夹
+```
+
+当本地修改完执行 `git push -u origin master` 后会创建一个新的 `master` 分支，同时会创建 `.git/refs/remotes` 目录、`.git/refs/remotes/origin` 目录、`.git/refs/remotes/origin/master` 文件、`.git/logs/refs/remotes` 目录和`.git/logs/refs/remotes/origin` 目录、`.git/logs/refs/remotes/master` 文件 
+
 ## 第一个阶段
 
 想要让git对一个目录进行版本管理需要以下步骤：
