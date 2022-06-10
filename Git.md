@@ -48,6 +48,20 @@ git 中有 HEAD 和 branch 两个指针，HEAD 用来指向当前所在的 commi
 
 当本地修改完执行 `git push -u origin master` 后会创建一个新的 `master` 分支，同时会创建 `.git/refs/remotes` 目录、`.git/refs/remotes/origin` 目录、`.git/refs/remotes/origin/master` 文件、`.git/logs/refs/remotes` 目录和`.git/logs/refs/remotes/origin` 目录、`.git/logs/refs/remotes/master` 文件 
 
+## git 的压缩
+
+当使用 `git add` 或 `git commit` 后，git 会在 .git/objects 依照 git 的规则生成对应的 hash
+
+每次对文件做更改后，再次使用 add 或 commit 后会再次按照 git 的规则生成文件 hash 将修改后的文件整个添加到 .git/objects
+
+当使用 `git gc` 后，则会生成 .git/objects/pack 文件，其中有 .idx 和 .pack 两个文件，压缩方式主要为存储差异化
+
+`git pack-verify -v .git/objects/pack/idx` 文件或pack文件可以查看压缩的文件的详细内容
+
+当使用 `git clone` 后，git 会节约带宽提高传输效率只会将压缩后的文件下载下来
+
+当删除分支后，可以使用 `git prune` 删除掉 unreachable 的 blob 对象文件（merge 一个 branch 后再删除这个 branch 所遗留的 blob 对象不会被 git 认为是 unreachable），使用 `git fsck` 可以查看所有 unreachable 的 blob 对象
+
 ## 第一个阶段
 
 想要让git对一个目录进行版本管理需要以下步骤：
