@@ -6,7 +6,7 @@
 
 用于存放 git 暂存区和本地仓库的内容
 
-`objects` 文件夹中所有文件的类型（使用 `git cat-files -t` 查看文件类型，`git cat-files -p` 查看文件内容）：
+`objects` 文件夹中所有文件的类型（使用 `git cat-file -t` 查看文件类型，`git cat-file -p` 查看文件内容）：
 
 - tree 存放本次提交的所有 文件名称/文件夹名称 以及这些 文件/文件夹名称 对应的 hash
 - commit 存放项目作者以及更改者的信息、更改时间戳和时区，同时有该提交的 commit message 和对应的 tree hash（如果是在一次提交之后提交，则还会有 parent commit hash)
@@ -17,7 +17,7 @@
 
 ## `index`
 
-`git fs-files -s`
+`git ls-files -s`
 
 存放本地库中所有文件的相对于 git 目录的文件 URL 和 hash
 
@@ -67,7 +67,7 @@ git 中有 HEAD 和 branch 两个指针，HEAD 用来指向当前所在的 commi
 
 git 的分支会指向当前最新一次提交的 commit hash，而当有新的分支，例如 dev 从 master 分支创建，而 master 和 dev 分支后续又都进行了新的提交操作，此时在 master 上想要合并 dev 的内容，因为两个分支所指向的最新的 commit hash 对方分支都没有，则会产生新的合并 commit hash
 
-而 rebase 则是将当前分支的基本（从某一个分支切过来时所指向的 commit hash）指向指定的分支的 HEAD commit hash 形成 fast forword 合并
+而 rebase 则是将当前分支的基本（从某一个分支切过来时所指向的 commit hash）指向指定的分支的 HEAD commit hash 形成 Fast-forword 合并
 
 branch dev: `git rebase master`
 
@@ -80,6 +80,44 @@ branch dev: `git rebase master`
 `git tag -d 标签名称` 会删除对应的 tag，同时会删除 `.git/refs/tags/标签名称` 文件，但不会删除 objects 中对应的 tag 对象
 
 `git tag -a 标签名称 [特定的 commit hash] -m 描述信息`，如果有描述信息则会在 .git/objects 里产生一个 tag 类型的文件存放标签信息
+
+## clone
+
+本地 .git 中会向 .git/packed-refs 的文件添加当前远程分支所指向的最新的 commit hash 的记录
+
+本地也会创建一个和远程分支指向相同的分支
+
+## fetch
+
+更新 .git/refs/remotes/origin 文件夹下所有的远程分支的最新的 commit hash 并在 objects 添加对应的 commit 文件，本地没有而远程有则创建，但 .git/refs/heads 下所对应的本地分支的最新 commit hash 并没有更新，若要更新需再执行 merge(`git checkout master && git merge origin/master`) 操作，或者直接 pull（会生成保存合并之前的 commit hash 信息的 .git/ORIG_HEAD 文件便于回滚 `git reset --hard ORIG_HEAD）
+
+默认若本地有而远程没有不会删除，但可以通过 `git fetch --prune`/`git remote prune` 删除本地有而远程没有的分支
+
+创建 .git/FETCH_HEAD 文件，存储远程分支所指向的最新的 commit hash，顺序则是将当前所处的分支对应的远程分支的信息放在第一个，而其他的全为 not-for-merge
+
+`git fetch -v` 查看本地远程信息是否是最新的
+
+## remote
+
+`git remote -v` 查看当前本地仓库所对应的远程 fetch/push 地址
+
+`git remote` 查看本地仓库所设置的远程仓库的别名
+
+`git remote show 远程仓库别名` 通过网络查看本地仓库所配置的远程仓库的最新信息以及与本地仓库信息的差异
+
+## branch
+
+`git branch` 查看本地分支
+
+`git branch -r` 查看远程分支
+
+`git branch -a` 查看本地与远程分支
+
+`git branch -vv` 显示本地分支并对本地与远程分支有关联的本地分支额外显示其与远程分支的位置信息
+
+## hooks
+
+![git hook flow](https://delicious-insights.com/assets/images/articles/git-hooks.png)
 
 ## 第一个阶段
 
