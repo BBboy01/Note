@@ -11,6 +11,7 @@
 - tree 存放本次提交的所有 文件名称/文件夹名称 以及这些 文件/文件夹名称 对应的 hash
 - commit 存放项目作者以及更改者的信息、更改时间戳和时区，同时有该提交的 commit message 和对应的 tree hash（如果是在一次提交之后提交，则还会有 parent commit hash)
 - blob 存放文件内容
+- tag 存放标签的描述信息，主要有打标签时对应的 commit hash、标签名称、标签描述信息、打标签的人的描述信息与时间戳
 
 当存储暂存区中的内容时，会以 sha1 算法将 `blob 文件内容长度\0文件内容` 进行编码生成一个160位的二进制 hash，第一个字节作为文件夹名称，后面的 hash 值作为文件名称，其中存储二进制形式的文件内容
 
@@ -61,6 +62,24 @@ git 中有 HEAD 和 branch 两个指针，HEAD 用来指向当前所在的 commi
 当使用 `git clone` 后，git 会节约带宽提高传输效率只会将压缩后的文件下载下来
 
 当删除分支后，可以使用 `git prune` 删除掉 unreachable 的 blob 对象文件（merge 一个 branch 后再删除这个 branch 所遗留的 blob 对象不会被 git 认为是 unreachable），使用 `git fsck` 可以查看所有 unreachable 的 blob 对象
+
+## rebase 变基
+
+git 的分支会指向当前最新一次提交的 commit hash，而当有新的分支，例如 dev 从 master 分支创建，而 master 和 dev 分支后续又都进行了新的提交操作，此时在 master 上想要合并 dev 的内容，因为两个分支所指向的最新的 commit hash 对方分支都没有，则会产生新的合并 commit hash
+
+而 rebase 则是将当前分支的基本（从某一个分支切过来时所指向的 commit hash）指向指定的分支的 HEAD commit hash 形成 fast forword 合并
+
+branch dev: `git rebase master`
+
+## tag
+
+`git tag` 查看所有的标签
+
+`git tag 标签名称`，当执行完此命令后，`.git/refs/tags` 目录下会多出一个 `标签名称` 的文件，里面存储了打标签时的 commit hash
+
+`git tag -d 标签名称` 会删除对应的 tag，同时会删除 `.git/refs/tags/标签名称` 文件，但不会删除 objects 中对应的 tag 对象
+
+`git tag -a 标签名称 [特定的 commit hash] -m 描述信息`，如果有描述信息则会在 .git/objects 里产生一个 tag 类型的文件存放标签信息
 
 ## 第一个阶段
 
