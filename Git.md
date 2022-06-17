@@ -1,6 +1,41 @@
 # 基础
 
+![git分区](https://www.escapelife.site/images/intro-basic-principles-git-12.png)
+
+## git commit 后 objects 结构
+
+![commit](https://www.escapelife.site/images/intro-basic-principles-git-14.png)
+
+版本变更的流向
+
+![git version flow](https://www.escapelife.site/images/intro-basic-principles-git-17.png)
+
+## 文件的生命周期状态
+
+基本过程
+
+![](https://www.escapelife.site/images/intro-basic-principles-git-20.png)
+
+![](https://www.escapelife.site/images/intro-basic-principles-git-21.png)
+
 ## `.git`目录
+
+```bash
+➜ tree .git
+.git
+├── HEAD
+├── config
+├── description
+├── hooks
+├── info
+│   └── exclude
+├── objects
+│   ├── info
+│   └── pack
+└── refs
+    ├── heads
+    └── tags
+```
 
 ### `objects`
 
@@ -13,7 +48,7 @@
 - blob 存放文件内容
 - tag 存放标签的描述信息，主要有打标签时对应的 commit hash、标签名称、标签描述信息、打标签的人的描述信息与时间戳
 
-当存储暂存区中的内容时，会以 sha1 算法将 `blob 文件内容长度\0文件内容` 进行编码生成一个160位的二进制 hash，第一个字节作为文件夹名称，后面的 hash 值作为文件名称，其中存储二进制形式的文件内容
+当存储暂存区中的内容时，会以 sha1 算法将 `文件类型 文件内容长度\0 文件内容 git` 进行编码生成一个160位的二进制 hash，第一个字节作为文件夹名称，后面的 hash 值作为文件名称，其中存储二进制形式的文件内容
 
 ## `index`
 
@@ -71,6 +106,34 @@ git 的分支会指向当前最新一次提交的 commit hash，而当有新的�
 
 branch dev: `git rebase master`
 
+```bash
+# 调整最近五次的提交记录
+$ git rebase -i HEAD~5
+$ git rebase -i 5af4zd35  # 往前第六次的commit值
+reword c2aeb6e 3rd commit
+squash 25a3122 4th commit
+pick 5d36f1d 5th commit
+fixup bd5d32f 6th commit
+drop 581e96d 7th commit
+
+# 查看提交历史记录
+$ git log
+* ce813eb - (HEAD -> master) 5th commit
+* aa2f043 - 3rd commit -> modified
+* 6c5418f - 2nd commit
+* c8f7dea - 1st commit
+```
+
+| 选项       | 含义                                                       |
+| ---------- | ---------------------------------------------------------- |
+| p`/`pick   | 使用这个 commit 记录                                       |
+| r`/`reword | 使用这个 commit 记录；并且修改提交信息                     |
+| e`/`edit   | 使用这个 commit 记录；rebase 时会暂停允许你修改这个 commit |
+| s`/`squash | 使用这个 commit 记录；会将当前 commit 与上一个 commit 合并 |
+| f`/`fixup  | 与 squash 选项相同；但不会保存当前 commit 的提交信息       |
+| x`/`exec   | 执行其他 shell 命令                                        |
+| d`/`drop   | 移除这个 commit 记录                                       |
+
 ## tag
 
 `git tag` 查看所有的标签
@@ -114,6 +177,34 @@ branch dev: `git rebase master`
 `git branch -a` 查看本地与远程分支
 
 `git branch -vv` 显示本地分支并对本地与远程分支有关联的本地分支额外显示其与远程分支的位置信息
+
+## 处理工作中断
+
+```bash
+# 存储当前的修改但不用提交commit
+$ git stash
+
+# 保存当前状态包括untracked的文件
+$ git stash -u
+
+# 展示所有stashes信息
+$ git stash list
+
+# 回到某个stash状态
+$ git stash apply <stash@{n}>
+
+# 删除储藏区
+$ git stash drop <stash@{n}>
+
+# 回到最后一个stash的状态并删除这个stash信息
+$ git stash pop
+
+# 删除所有的stash信息
+$ git stash clear
+
+# 从stash中拿出某个文件的修改
+$ git checkout <stash@{n}> -- <file-path>
+```
 
 ## hooks
 
