@@ -33,5 +33,8 @@ User root
 `vim ~/.ssh/config`
 ```bash
 Host *
-	ServerAliveInterval 60
+	ServerAliveInterval 30
+  TCPKeepAlive yes
+  ServerAliveCountMax 6
+  Compression yes
 ```
