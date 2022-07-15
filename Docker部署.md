@@ -257,11 +257,7 @@ docker中每建立一个容器都会创建两个虚拟网卡，一个为容器�
 - `docker connect myNet tomcat01`
 - 之后docker便会将tomcat01放到myNet网络下
 
-## docker-compose批量启动容器
-
-- 安装
-
-  - `pip install docker-compose`
+## docker compose批量启动容器
 
 - 编写`docker-compose.yaml`
 
@@ -298,11 +294,11 @@ docker中每建立一个容器都会创建两个虚拟网卡，一个为容器�
       web_data:
   ```
 
-- 启动`docker-compose up`
+- 启动`docker compose up` 不指定 -f 默认启动文件为 `docker-compose.yaml`
 
-- 后台启动`docker-compose up -d`
+- 后台启动`docker compose up -d`
 
-- 某个容器启动多个`docker-compose up -d --scale wordpress=3`
+- 某个容器启动多个`docker compose up -d --scale wordpress=3`
 
 - 启动后的容器名称为：`当前所处的文件夹名称 + services中起的名称`，如果启动多个则会在后面拼上`_1、_2`
 
