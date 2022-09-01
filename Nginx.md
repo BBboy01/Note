@@ -523,3 +523,801 @@ server {
 }
 ```
 
+# 负载均衡
+
+跨多个应用程序实例的负载平衡是一种常用技术，用于优化资源利用率、最大化吞吐量、减少延迟和确保容错配置。‎使用nginx作为非常有效的HTTP负载平衡器，将流量分配到多个应用程序服务器，可以提升Web应用程序的性能，提高扩展性和可靠性。
+
+## 配置服务组
+
+![image.png](https://cdn.nlark.com/yuque/0/2022/png/28915315/1659424182326-cbf92b95-7038-436a-bf74-d086ef1db637.png)
+
+使用 `upstream`定义一组服务 。
+
+> 注意：upstream 位于 http上下文中，与server 并列，不要放在server中
+
+```nginx
+upstream ruoyi-apps {
+    #不写，采用轮循机制
+    server http://localhost:8080;
+    server http://localhost:8088;
+  
+}
+
+server {
+  
+  listen 8003;
+  server_name ruoyi.loadbalance;
+  
+  location / {
+    proxy_pass http://ruoyi-apps;
+  }
+
+}
+```
+
+## 负载均衡策略
+
+### 轮循机制（round-robin）
+
+默认机制，以轮循机制方式分发。
+
+### [最小连接](https://nginx.org/en/docs/http/ngx_http_upstream_module.html#least_conn)（least-connected ）
+
+将下一个请求分配给活动连接数最少的服务器（较为空闲的服务器）。‎
+
+```nginx
+upstream backend {
+    least_conn;
+    server backend1.example.com;
+    server backend2.example.com;
+}
+```
+
+> 请注意，使用轮循机制或最少连接的负载平衡，每个客户端的请求都可能分发到不同的服务器。不能保证同一客户端将始终定向到同一服务器。‎
+
+### [ip-hash](https://nginx.org/en/docs/http/ngx_http_upstream_module.html#ip_hash)
+
+客户端的 IP 地址将用作哈希键，来自同一个ip的请求会被转发到相同的服务器。
+
+```nginx
+upstream backend {
+    ip_hash;
+    server backend1.example.com;
+    server backend2.example.com;
+}
+```
+
+> 此方法可确保来自同一客户端的请求将始终定向到同一服务器，除非此服务器不可用。‎
+
+### [hash](https://nginx.org/en/docs/http/ngx_http_upstream_module.html#hash)
+
+通用hash，允许用户自定义hash的key，key可以是字符串、变量或组合。
+
+例如，key可以是配对的源 IP 地址和端口，也可以是 URI，如以下示例所示：
+
+```nginx
+upstream backend {
+    hash $request_uri consistent;
+    server backend1.example.com;
+    server backend2.example.com;
+}
+```
+
+> 请注意：基于 IP 的哈希算法存在一个问题，那就是当有一个上游服务器宕机或者扩容的时候，会引发大量的路由变更，进而引发连锁反应，导致大量缓存失效等问题。
+
+`consistent`参数启用 ‎[‎ketama‎](http://www.last.fm/user/RJ/journal/2007/04/10/rz_libketama_-_a_consistent_hashing_algo_for_memcache_clients)‎ 一致哈希算法，如果在上游组中添加或删除服务器，只会重新映射部分键，从而最大限度地减少缓存失效。‎
+
+假设我们基于 key 来做 hash，现在有 4 台上游服务器，如果 hash 算法对 key 取模，请求根据用户定义的哈希键值均匀分布在所有上游服务器之间。‎
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/28915315/1659518154051-3160e796-eeb0-47e9-9dff-204359a5c06b.png)当有一台服务器宕机的时候，就需要重新对 key 进行 hash，最后会发现所有的对应关系全都失效了，从而会引发缓存大范围失效。
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/28915315/1659518106125-461a8771-50aa-4033-864c-43bc91f516d6.png)
+
+![](https://cdn.nlark.com/yuque/0/2022/png/28915315/1659518178713-4ea13d8a-6993-41ba-aa7d-29421fb7c650.png)
+
+### [随机‎](https://nginx.org/en/docs/http/ngx_http_upstream_module.html#random)‎  (random）
+
+每个请求都将传递到随机选择的服务器。
+
+two是可选参数，NGINX 在考虑服务器权重的情况下随机选择两台服务器，然后使用指定的方法选择其中一台，默认为选择连接数最少（least_conn‎）的服务器。
+
+```nginx
+upstream backend {
+    random two least_conn;
+    server backend1.example.com;
+    server backend2.example.com;
+    server backend3.example.com;
+    server backend4.example.com;
+}
+```
+
+### 权重（weight）
+
+![image.png](https://cdn.nlark.com/yuque/0/2022/png/28915315/1659425649735-e2fdb0a4-5aaa-4a0e-81b3-44a8f7682c9c.png)
+
+```nginx
+upstream my-server {
+    server performance.server weight=3;
+    server app1.server;
+    server app2.server;
+}
+```
+
+如上所示，每 5 个新请求将按如下方式分布在应用程序实例中：3 个请求将定向到performance.server，一个请求将转到app1.server，另一个请求将转到app2.server。‎
+
+### 健康检查
+
+在反向代理中，如果后端服务器在某个周期内响应失败次数超过规定值，nginx会将此服务器标记为失败，并在之后的一个周期不再将请求发送给这台服务器。‎
+
+通过[fail_timeout‎](https://nginx.org/en/docs/http/ngx_http_upstream_module.html#fail_timeout)‎ 来设置检查周期，默认为10秒。
+
+通过[max_fails‎](https://nginx.org/en/docs/http/ngx_http_upstream_module.html#max_fails)来设置检查失败次数，默认为1次。‎
+
+‎在以下示例中，如果NGINX无法向服务器发送请求或在30秒内请求失败次数超过3次，则会将服务器标记为不可用30秒。
+
+```nginx
+upstream backend {
+  server backend1.example.com;
+  server backend2.example.com max_fails=3 fail_timeout=30s; 
+} 
+```
+
+# HTTPS配置
+
+HTTPS 协议是**由HTTP 加上TLS/SSL 协议构建的可进行加密传输、身份认证的网络协议**，主要通过数字证书、加密算法、非对称密钥等技术完成互联网数据传输加密，实现互联网传输安全保护。
+
+## 生成证书
+
+```bash
+openssl genrsa -des3 -out server.key 2048
+openssl req -new -key server.key -out server.csr
+openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+```
+
+## 配置ssl
+
+```nginx
+server {
+    listen              443 ssl;
+    server_name         ruoyi.https;
+    ssl_certificate     /home/ssl/server.crt;
+    ssl_certificate_key /home/ssl/server.key;
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+  
+    location / {
+        proxy_pass http://localhost:8088;
+    }
+}
+```
+
+如果设置了密码，需要加上
+
+```nginx
+server{
+  ……
+  ssl_password_file   /home/ssl/cert.pass;
+  ……
+} 
+```
+
+## https优化
+
+SSL 操作会消耗额外的 CPU 资源。CPU 占用最多的操作是 SSL 握手。有两种方法可以最大程度地减少每个客户端的这些操作数：
+
+- 使保持活动连接能够通过一个连接发送多个请求
+- 重用 SSL 会话参数以避免并行连接和后续连接的 SSL 握手
+
+会话存储在工作进程之间共享并由 [ssl_session_cache](https://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_session_cache) 指令配置的 SSL 会话缓存中。一兆字节的缓存包含大约 4000 个会话。默认缓存超时为 5 分钟。可以使用 [ssl_session_timeout](https://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_session_timeout) 指令增加此超时。以下是针对具有 10 MB 共享会话缓存的多核系统优化的示例配置：
+
+```nginx
+ssl_session_cache   shared:SSL:10m;
+ssl_session_timeout 10m;
+```
+
+# TCP反向代理
+
+## stream
+
+```nginx
+#HTTP代理
+http {
+  server {
+    listen 8002;
+    proxy_pass http://localhost:8080/;
+  }
+}
+
+#TCP代理
+stream {
+  server {
+    listen 13306;
+    proxy_pass localhost:3306;
+  }
+}
+```
+
+## tcp负载均衡
+
+```nginx
+stream {
+  
+  upstream backend-mysql {
+  
+    server localhost:3306;
+    server localhost:3307;
+    
+    keepalive 8;
+  }
+  
+  server {
+    listen 13306;
+    proxy_pass backend-mysql;
+  }
+}
+```
+
+使用`keepalive`定义连接池里空闲连接的数量。
+
+`keepalive_timeout` 默认60s。如果连接池里的连接空闲时间超过这个值，则连接关闭。
+
+在最简单的 HTTP 实现中，客户端打开新连接，写入请求，读取响应，然后关闭连接以释放关联的资源。
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/28915315/1659513123084-afe08b7c-223b-4b8c-8f47-9e1ee09a2303.png)
+
+在客户端读取响应后，保持连接处于打开状态，因此可以将其重新用于后续请求。
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/28915315/1659513122399-c3e4f8c4-d154-4bc3-b073-6303c2ff67bd.png)
+
+使用 [keepalive](https://nginx.org/en/docs/http/ngx_http_upstream_module.html#keepalive) 指令启用从 NGINX Plus 到上游服务器的保持活动连接，定义在每个工作进程的缓存中保留的与上游服务器的空闲保持活动连接的最大数量。当超过此数字时，将关闭最近最少使用的连接。如果没有 keepalives，您将增加更多的开销，并且连接和临时端口都效率低下。
+
+现代 Web 浏览器通常会打开 6 到 8 个保持连接。
+
+# 重写(return和rewrite)
+
+nginx有两个重写指令：`return`和`rewrite`
+
+## return
+
+服务端停止处理并将状态码status code返回给客户端
+
+return *code* *URL*
+return *code* *text*
+return *code*
+return *URL*
+
+### 强制所有请求使用Https
+
+错误写法
+
+```nginx
+server {
+
+    listen 8003;
+    server_name ruoyi.loadbalance;
+
+    return 301 https://localhost:8004;
+}
+```
+
+正确写法
+
+```nginx
+server {
+
+    listen 8003;
+    server_name ruoyi.loadbalance;
+
+    return 301 https://192.168.56.105:8004;
+}
+```
+
+### 转发和重定向
+
+转发是服务端行为，重定向是客户端行为。
+
+#### 转发
+
+发向代理proxy_pass属于转发，浏览器的访问栏输入的地址不会发生变化。
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/28915315/1660027681278-8d232df3-69f1-4bb7-ae31-70dab5777cb7.png)
+
+#### 重定向
+
+return，rewrite属于重定向，在客户端进行。浏览器的访问栏输入的地址会发生变化。
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/28915315/1660014580821-4eae68ec-ecf6-45ef-a5a7-4e33a77efec9.png)
+
+域名迁移，不让用户收藏的链接或者搜索引擎的链接失效
+
+将请求从 www.old-name.com **old-name.com** 永久重定向到 **www.new-name.com，包含http和https请求**
+
+```nginx
+server {
+    listen 80;
+    listen 443 ssl;
+    server_name www.old-name.com old-name.com;
+    return 301 $scheme://www.new-name.com$request_uri;
+}
+```
+
+由于捕获了域名后面的 URL 部分，因此，如果新旧网站之间存在一对一的页面对应关系（例如，**www.new-name.com/about** 具有与 **www.old-name.com/about** 相同的基本内容），则此重写是合适的。如果除了更改域名之外还重新组织了网站，则通过省略以下内容，将所有请求重定向到主页可能会更安全
+
+```nginx
+server {
+    listen 80;
+    listen 443 ssl;
+    server_name www.old-name.com old-name.com;
+    return 301 $scheme://www.new-name.com;
+}
+```
+
+添加www
+
+```nginx
+# add 'www'
+server {
+    listen 80;
+    listen 443 ssl;
+    server_name domain.com;
+    return 301 $scheme://www.domain.com$request_uri;
+}
+```
+
+#### 状态码
+
+- 2xx 成功
+- 3xx 表示重定向
+
+- - 301 永久重定向
+  - 302 临时重定向
+
+- 4xx 请求地址出错
+
+- - 403 拒绝请求
+  - 404 请求找不到
+
+- 5xx 服务器内部错误
+
+## rewrite
+
+如果指定的正则表达式与请求 URI 匹配，则 URI 将按照字符串中的指定进行更改。指令按其在配置文件中出现的先后顺序执行。
+
+```nginx
+server {
+    # ...
+    rewrite ^(/download/.*)/media/(\w+)\.?.*$ $1/mp3/$2.mp3 last;
+    rewrite ^(/download/.*)/audio/(\w+)\.?.*$ $1/mp3/$2.ra  last;
+    return  403;
+    # ...
+}
+```
+
+上面是使用该指令的示例 NGINX 重写规则。它匹配以字符串 **/download** 开头的 URL，然后在路径后面的某个位置包含 **/media**/ 或 **/audio/** 目录。它将这些元素替换为 **/mp3/，**并添加相应的文件扩展名**，.mp3** 或 **.ra**。和 变量捕获未更改的路径元素。例如，**/download/cdn-west/media/file1** 变成了 **/download/cdn-west/mp3/file1.mp3**。如果文件名上有扩展名（如 **.flv**），则表达式会将其剥离，并将其替换为**.mp3**。
+
+如果字符串包含新的请求参数，则以前的请求参数将追加到这些参数之后。如果不需要这样做，则在替换字符串的末尾放置一个问号可以避免附加它们，例如：*replacement*
+
+```nginx
+rewrite ^/users/(.*)$ /show?user=$1? last;
+```
+
+### last与break
+
+`last`：如果当前规则不匹配，停止处理后续rewrite规则，使用重写后的路径，重新搜索location及其块内指令
+
+`break`:如果当前规则不匹配，停止处理后续rewrite规则，执行{}块内其他指令
+
+### 不使用last和break
+
+在root /home/AdminLTE-3.2.0/pages下创建一个1.txt，里面内容是`this is a file`
+
+```nginx
+server {
+
+    listen 8000;
+    server_name nginx-dev;
+
+    rewrite_log on;
+
+    location / {
+        rewrite ^/old/(.*) /new/$1;
+        rewrite ^/new/(.*) /pages/$1;
+        #根目录
+        root /home/AdminLTE-3.2.0;
+        #首页
+        index index.html index2.html index3.html;
+    }
+
+    location  /pages/1.txt {
+        return 200 "this is rewrite test!";
+    }
+
+}
+```
+
+默认按顺序执行。
+
+访问 http://192.168.56.105:8000/old/1.txt
+
+结果：`this is rewrite test!`
+
+日志：
+
+```txt
+[notice] 26837#26837: *1181 "^/old/(.*)" matches "/old/1.txt", client: 192.168.56.1, server: nginx-dev, request: "GET /old/1.txt HTTP/1.1", host: "192.168.56.105:8000"
+[notice] 26837#26837: *1181 rewritten data: "/new/1.txt", args: "", client: 192.168.56.1, server: nginx-dev, request: "GET /old/1.txt HTTP/1.1", host: "192.168.56.105:8000"
+[notice] 26837#26837: *1181 "^/new/(.*)" matches "/new/1.txt", client: 192.168.56.1, server: nginx-dev, request: "GET /old/1.txt HTTP/1.1", host: "192.168.56.105:8000"
+[notice] 26837#26837: *1181 rewritten data: "/pages/1.txt", args: "", client: 192.168.56.1, server: nginx-dev, request: "GET /old/1.txt HTTP/1.1", host: "192.168.56.105:8000"
+```
+
+### 使用break
+
+访问 http://192.168.56.105:8000/old/1.txt
+
+1. 匹配到了`rewrite ^/old/(.*) /new/$1`
+
+2. `**break**`指令不执行后续的rewrite规则,以新的`/new/1.txt`路径去执行块内的其他指令
+
+3. 去`root`目录下寻找文件, 由于不再村`/home/AdminLTE-3.2.0/new/1.txt`这个文件，返回404
+
+```nginx
+server {
+
+    listen 8000;
+    server_name nginx-dev;
+
+    rewrite_log on;
+
+    location / {
+        rewrite ^/old/(.*) /new/$1 break;
+        rewrite ^/new/(.*) /pages/$1;
+        #根目录
+        root /home/AdminLTE-3.2.0;
+        #首页
+        index index.html index2.html index3.html;
+    }
+
+    location  /pages/1.txt {
+        return 200 "this is rewrite test!";
+    }
+
+}
+```
+
+访问 http://192.168.56.105:8000/old/1.txt
+
+结果：
+
+![img](https://cdn.nlark.com/yuque/0/2022/png/28915315/1660113329221-e8f2be96-2c99-4d9c-a3a7-ac6ea48f5992.png)
+
+访问日志：
+
+```txt
+[notice] 26772#26772: *1179 "^/old/(.*)" matches "/old/1.txt", client: 192.168.56.1, server: nginx-dev, request: "GET /old/1.txt HTTP/1.1", host: "192.168.56.105:8000"
+[notice] 26772#26772: *1179 rewritten data: "/new/1.txt", args: "", client: 192.168.56.1, server: nginx-dev, request: "GET /old/1.txt HTTP/1.1", host: "192.168.56.105:8000"
+[error] 26772#26772: *1179 open() "/home/AdminLTE-3.2.0/new/1.txt" failed (2: No such file or directory), client: 192.168.56.1, server: nginx-dev, request: "GET /old/1.txt HTTP/1.1", host: "192.168.56.105:8000"
+```
+
+### 使用last
+
+访问 http://192.168.56.105:8000/old/1.txt
+
+1. 匹配到了`rewrite ^/old/(.*) /new/$1`
+
+2. `**last**`指令不执行后续的rewrite规则,以新的`/new/1.txt`路径去匹配location
+
+3. 先匹配到`location /`, 有匹配到location里的`rewrite ^/new/(.*) /pages/$1`规则，重定向到 /pages/1.txt
+
+4. 匹配到了`location /pages/1.txt` ，于是返回了`this is rewrite test!`
+
+```nginx
+server {
+
+    listen 8000;
+    server_name nginx-dev;
+
+    rewrite_log on;
+
+    location / {
+        rewrite ^/old/(.*) /new/$1 last;
+        rewrite ^/new/(.*) /pages/$1;
+        #根目录
+        root /home/AdminLTE-3.2.0;
+        #首页
+        index index.html index2.html index3.html;
+    }
+
+    location  /pages/1.txt {
+        return 200 "this is rewrite test!";
+    }
+
+}
+```
+
+访问 http://192.168.56.105:8000/old/1.txt
+
+结果：`this is rewrite test!`
+
+日志：
+
+```txt
+[notice] 26969#26969: *1185 "^/old/(.*)" matches "/old/1.txt", client: 192.168.56.1, server: nginx-dev, request: "GET /old/1.txt HTTP/1.1", host: "192.168.56.105:8000"
+[notice] 26969#26969: *1185 rewritten data: "/new/1.txt", args: "", client: 192.168.56.1, server: nginx-dev, request: "GET /old/1.txt HTTP/1.1", host: "192.168.56.105:8000"
+[notice] 26969#26969: *1185 "^/old/(.*)" does not match "/new/1.txt", client: 192.168.56.1, server: nginx-dev, request: "GET /old/1.txt HTTP/1.1", host: "192.168.56.105:8000"
+[notice] 26969#26969: *1185 "^/new/(.*)" matches "/new/1.txt", client: 192.168.56.1, server: nginx-dev, request: "GET /old/1.txt HTTP/1.1", host: "192.168.56.105:8000"
+[notice] 26969#26969: *1185 rewritten data: "/pages/1.txt", args: "", client: 192.168.56.1, server: nginx-dev, request: "GET /old/1.txt HTTP/1.1", host: "192.168.56.105:8000"
+```
+
+# 其他常见指令
+
+## gzip压缩
+
+压缩响应通常会显著减小传输数据的大小。但是，由于压缩发生在运行时，因此它还会增加相当大的处理开销，从而对性能产生负面影响。NGINX在将响应发送到客户端之前执行压缩，但如果后端服务器已经对内容进行了压缩，则nginx不会再压缩。
+
+若要启用压缩，请在参数中包含 [gzip](https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip) 指令。
+
+```nginx
+gzip on; 
+gzip_types text/plain application/xml; 
+gzip_min_length 1000; 
+```
+
+默认情况下，NGINX仅使用压缩MIME类型是`text/html`的响应。若要使用其他 MIME 类型压缩响应，可以使用 [gzip_types](https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_types) 指令并列出其他类型。
+
+若要指定压缩响应的最小长度，请使用 [gzip_min_length](https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_min_length) 指令。默认值为 20 个字节（此处调整为 1000)。
+
+## sendfile
+
+默认情况下，NGINX处理文件传输本身，并在发送之前将文件复制到缓冲区中。启用 [sendfile](https://nginx.org/en/docs/http/ngx_http_core_module.html#sendfile) 指令可消除将数据复制到缓冲区的步骤，直接将一个文件复制到另一个文件。
+
+启用sendfile，类似Java中的零拷贝（zero copy）
+
+```nginx
+location /download {
+  sendfile           on;
+  tcp_nopush         on; 
+  #... 
+} 
+```
+
+将 [tcp_nopush](https://nginx.org/en/docs/http/ngx_http_core_module.html#tcp_nopush) 指令与 [sendfile](https://nginx.org/en/docs/http/ngx_http_core_module.html#sendfile) 指令一起使用。这使NGINX能够在获得数据块后立即在一个数据包中发送HTTP响应标头。
+
+## try_files
+
+[try_files](https://nginx.org/en/docs/http/ngx_http_core_module.html#try_files)指令可用于检查指定的文件或目录是否存在;如果不存在，则重定向到指定位置。
+
+如下，如果原始URI对应的文件不存在，NGINX将内部重定向到`/www/data/images/default.gif`
+
+```nginx
+server {
+    root /www/data;
+
+    location /images/ {
+        try_files $uri /images/default.gif;
+    }
+}
+```
+
+最后一个参数也可以是状态代码（状态码之前需要加上等号）。
+
+在下面的示例中，如果指令的所有参数都无法解析为现有文件或目录，则会返回404错误。
+
+```nginx
+location / {
+    try_files $uri $uri/ $uri.html =404;
+}
+```
+
+在下一个示例中，如果原始 URI 和附加尾随斜杠的 URI 都没有解析到现有文件或目录中，则请求将重定向到命名位置，该位置会将其传递到代理服务器。
+
+```nginx
+location / {
+    try_files $uri $uri/ @backend;
+}
+
+location @backend {
+    proxy_pass http://backend.example.com;
+}
+```
+
+## error_page
+
+为错误指定显示的页面。值可以包含变量。
+
+```nginx
+error_page 404             /404.html; 
+error_page 500 502 503 504 /50x.html;
+```
+
+# 推荐写法及注意事项
+
+## 推荐写法
+
+### 重复的配置可继承自父级
+
+```nginx
+server {
+  server_name www.example.com;
+  
+  location / {
+    root /var/www/nginx-default/;
+    # [...]
+  }
+  location /foo {
+    root /var/www/nginx-default/;
+    # [...]
+  }
+  location /bar {
+    root /some/other/place;
+  # [...]
+  }
+}
+```
+
+推荐写法
+
+```nginx
+server {
+    server_name www.example.com;
+    root /var/www/nginx-default/;
+    
+    location / {
+        # root继承父级配置
+        # [...]
+    }
+    location /foo {
+        # root继承父级配置
+        # [...]
+    }
+    location /bar {
+        # 覆盖
+        root /some/other/place;
+        # [...]
+    }
+}
+```
+
+这样在添加新的location时，可以避免重复配置。
+
+### 不要将所有请求都代理到后端服务器
+
+```nginx
+location / {
+    proxy_pass http://localhost:8088;        
+}
+```
+
+考虑到很多请求是访问静态内容（如图片，css，javascript等文件）,可以使用缓存或者配置静态目录来减少发送到后端的请求数量，这样可以减小后端服务器的开销。
+
+```nginx
+server {
+
+    listen 8002;
+    server_name ruoyi.tomcat;
+    root /home/www/static;
+
+    location / {
+        try_files $uri $uri/ @proxy;
+    }
+
+    location @proxy {
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        proxy_pass http://localhost:8080;
+    }
+  
+}
+```
+
+### 若非必要，不要缓存动态请求，只缓存静态文件
+
+nginx关于缓存的指令非常多
+
+​     [proxy_cache](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache)
+​     [proxy_cache_background_update](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_background_update)
+​     [proxy_cache_bypass](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_bypass)
+​     [proxy_cache_convert_head](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_convert_head)
+​     [proxy_cache_key](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_key)
+​     [proxy_cache_lock](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_lock)
+​     [proxy_cache_lock_age](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_lock_age)
+​     [proxy_cache_lock_timeout](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_lock_timeout)
+​     [proxy_cache_max_range_offset](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_max_range_offset)
+​     [proxy_cache_methods](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_methods)
+​     [proxy_cache_min_uses](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_min_uses)
+​     [proxy_cache_path](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_path)
+​     [proxy_cache_purge](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_purge)
+​     [proxy_cache_revalidate](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_revalidate)
+​     [proxy_cache_use_stale](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_use_stale)
+​     [proxy_cache_valid](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_valid)
+​     [proxy_no_cache](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_no_cache)
+
+由于nginx服务端缓存非常复杂，在使用缓存的时候，我们要清楚的知道在什么条件下，哪些文件会被缓存。
+
+在配置文件中，最好能够清晰的指定哪些文件使用缓存。
+
+### 检查文件是否存在使用try_files代替if -f
+
+```nginx
+server {
+    root /var/www/example.com;
+    location / {
+        if (!-f $request_filename) {
+            break;
+        }
+    }
+}
+```
+
+推荐用法：
+
+```nginx
+server {
+    root /var/www/example.com;
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+### 在重写路径中包含http://或https://
+
+```nginx
+#推荐写法
+rewrite ^ http://example.com permanent; 
+
+#不推荐的写法
+rewrite ^ example.com permanent; 
+```
+
+### 保持重写规则简单干净
+
+```nginx
+#复杂的写法
+rewrite ^/(.*)$ http://example.com/$1 permanent; 
+
+#简单有效的写法
+rewrite ^ http://example.com$request_uri? permanent; 
+return 301 http://example.com$request_uri; 
+```
+
+## 注意事项
+
+### 正确的配置未生效，请清除浏览器缓存
+
+当你确定修改的配置的正确的，但是未生效，请清除浏览器缓存或者禁用浏览器缓存。
+
+### 在HTTPS中不启用 SSLv3
+
+由于 SSLv3 中存在 POODLE 漏洞，建议不要在启用了 SSL 的站点中使用 SSLv3。您可以使用以下行非常轻松地禁用 SSLv3，并仅提供 TLS 协议：
+
+```nginx
+ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+```
+
+### 不要将 root 目录配置成 `/`或 `/root`
+
+错误用法
+
+```nginx
+server {
+  #错误用法
+  root /;
+  
+  location /project/path {
+    #错误用法
+    root /root;
+  }
+}
+```
+
+### 谨慎使用chmod 777
+
+这可能是解决问题最简单的方式，同时也说明，你没有真的弄清楚哪里出了问题。
+
+可以使用`namei -om /path/to/check`显示路径上的所有权限，并找到问题的根本原因。
+
+### 不要将部署的项目拷贝到默认目录下
+
+升级或更新nginx的时候，默认目录可能被覆盖。
