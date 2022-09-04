@@ -48,7 +48,11 @@ Vim 不使用单一剪贴板进行剪贴、复制与黏贴，而是多组寄存�
 
 - `set nocompatible` 设置只在当前项目进行搜索（放在配置最前面）
 
-- `:syntax on` 设置语法高亮，vim 大部分情况下都能识别文件类型进行语法高亮
+- `syntax on` 设置语法高亮，vim 大部分情况下都能识别文件类型进行语法高亮
+
+- `set tabstop=2` 设置 tab 键的宽度
+
+- `set autoindent` 开启 自动锁进
 
 - `set encoding=utf8` 设置输入格式为 utf8
 
