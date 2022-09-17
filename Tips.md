@@ -71,7 +71,11 @@ const regReg = /\/[^\/]+\/g?(?=[,;\.])/;
 dhsaoi.replace(/dshai/g, dhsao)
 ```
 
+## CSS 百分比相对的目标
 
+- 相对父元素：`width` `height`
+- 相对父元素宽度：`margin` `padding`
+- 相对自身：`translate`
 
 ## `webpack` 自动导入模块
 
