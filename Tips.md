@@ -1,3 +1,29 @@
+## 获取安装时使用的包管理器类型
+
+当使用 `npm install` `yarn install` `pnpm install` 时，会在环境变量中创建对应包管理器的环境变量
+
+- yarn
+```json
+{
+  npm_config_registry: 'https://registry.yarnpkg.com',
+  npm_execpath: '/usr/local/lib/node_modules/yarn/bin/yarn.js',
+  npm_config_user_agent: 'yarn/1.22.11 npm/? node/v16.13.2 darwin arm64',
+}
+```
+
+- npm
+```json
+{
+  npm_config_metrics_registry: 'https://registry.npmjs.org/',
+  npm_execpath: '/opt/homebrew/lib/node_modules/npm/bin/npm-cli.js',
+  npm_config_user_agent: 'npm/8.5.5 node/v16.13.2 darwin arm64 workspaces/false',
+}
+```
+
+可以看到 `npm_config_user_agent` 的对应的值的第一项表明了当前安装时所使用的包管理器，然后就可以通过 `process.env.npm_config_user_agent` 获取到当前使用的包管理器了
+
+package.json 中的 preinstall 钩子函数只会在退出状态码不为 0 的时候退出执行，`only-allow` 库的实现原理也就显而易见了
+
 ## **使用**`rem`时获取屏幕宽度
 
 ```js
