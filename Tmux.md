@@ -1,8 +1,9 @@
 # Terminal command
 
 - create a new session `tmux new -s SESSION_NAME`
+- create a new session and don't attach to it `tmux new -s SESSION_NAME -d`
 - detach the current session `tmux detach`
-- attach a session with session name `tmux attach -t SESSION_NAME`
+- attach a session with session name `tmux a -t SESSION_NAME`
 - list all sessions on terminal `tmux ls`
 
 
@@ -11,9 +12,16 @@
 > My prefix key is <C-a>
 
 
+## Pane
+
+- swap current pane with the previous pane `<C-a>{`
+
+
 ## Session
 
 - list all of sessions of current window `<C-a>s`
+- detach the current session `<C-a>d`
+- switch attach client to previous session `<C-a>(`
 
 
 ## Window
