@@ -2,10 +2,28 @@
 
 ## Runner
 
-权限问题：
+### 权限问题：
 
 当第一次安装完 gitlab-runner 后，gitlab-runner 是基于 `gitlab-runner` 用户组运行的，
 如果是注册为 docker 类型的 runner，则需要运行 `usermod -aG docker` 将其添加到 docker 组中以获得对应的执行权限
+
+### 连接远程服务器：
+
+gitlab-runner 执行命令需要避免交互，因此在连接远程服务器时如果想避免出现首次连接未知地址服务器确认的交互，则需要添加以下配置：
+
+```bash
+cat > ~/.ssh/config << 'EOF'
+Host *
+  ServerAliveInterval=30
+  StrictHostKeyChecking no
+  UserKnownHostsFile=/dev/null
+EOF
+```
+
+- 切换到 gitlab-runner 用户生成 ssh-key `su - gitlab-runner`
+- 配置 ssh 配置文件权限 `chmod 600 -R ~/.ssh/config`
+- 生成 ssh 公私钥 `ssh-keygen`
+- 将本地 ssh 公钥添加到远程服务器中 `ssh-copy-id 用户名@远程服务器地址`，后需手动输入远程服务器密码
 
 ## 环境变量
 
@@ -58,6 +76,6 @@ deploy:
 
 结论：
 
-  1. instance 级别的变量可以通过不同的环境来区分使用
-  2. 不同 job 间可以随时读取环境变量中的值，不必声明额外配置
-  3. 当要想环境变量添加或修改值时，需要在当前 job 中添加 `artifacts`、`reports`、dotenv` 这几个关键字指明环境变量文件
+1. instance 级别的变量可以通过不同的环境来区分使用
+2. 不同 job 间可以随时读取环境变量中的值，不必声明额外配置
+3. 当要想环境变量添加或修改值时，需要在当前 job 中添加 `artifacts`、`reports`、dotenv` 这几个关键字指明环境变量文件
