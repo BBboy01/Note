@@ -1,5 +1,18 @@
 # CI
 
+## GPG Key
+
+- 安装 `brew install gpg2`
+- 生成 rsa-rsa 密钥对 `gpg --full-gen-key`，基本可以一路回车，输入邮箱环节需要输入对应的远程 git 仓库注册邮箱
+- 查看所有以生成的 gpg `gpg -k`
+- 输出对应邮箱的 gpg rsa 公钥 `gpg --armor --export 邮箱`
+- 将输出的公钥添加到远程 git 仓库中个人信息的 GPG 配置
+- 于对应的本地仓库中添加 git 开启签名配置：
+  - `git config user.name 用户名`
+  - `git config user.email 签名邮箱`
+  - `git config user.signingkey 签名邮箱`
+  - `git config commit.gpgsign true`
+
 ## Runner
 
 ### 权限问题：
