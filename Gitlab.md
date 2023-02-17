@@ -22,21 +22,30 @@
 
 ### 连接远程服务器：
 
-gitlab-runner 执行命令需要避免交互，因此在连接远程服务器时如果想避免出现首次连接未知地址服务器确认的交互，则需要添加以下配置：
+1. 首先添加一个 GitLab CI/CD 变量，将此变量命名为 `STAGING_PRIVATE_KEY` 并将其设置为服务器的**私有 SSH 密钥**
+
+2. 确保 `ssh-client` 可以使用 `which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )`
+
+3. 禁用主机检查（当第一次连接到服务器时，不要求用户接受，因为每个作业都等于第一次连接，所以我们需要这样做）
 
 ```bash
-cat > ~/.ssh/config << 'EOF'
-Host *
-  ServerAliveInterval=30
-  StrictHostKeyChecking no
-  UserKnownHostsFile=/dev/null
-EOF
+echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
 ```
 
-- 切换到 gitlab-runner 用户生成 ssh-key `su - gitlab-runner`
-- 配置 ssh 配置文件权限 `chmod 600 -R ~/.ssh/config`
-- 生成 ssh 公私钥 `ssh-keygen`
-- 将本地 ssh 公钥添加到远程服务器中 `ssh-copy-id 用户名@远程服务器地址`，后需手动输入远程服务器密码
+如果连接出现问题，可以先检查 `~/.ssh/config` 的权限是否是 600
+
+将本地 ssh 公钥添加到远程服务器中 `ssh-copy-id 用户名@远程服务器地址`，后需手动输入远程服务器密码
+
+### 部署：
+
+```yaml
+script:
+  - ssh-add <(echo "$STAGING_PRIVATE_KEY")
+  - ssh -p22 server_user@server_host "mkdir www/_tmp"
+  - scp -P22 -r dist/* server_user@server_host:www/_tmp
+  - ssh -p22 server_user@server_host "mv www/live www/_old && mv www/_tmp www/live"
+  - ssh -p22 server_user@server_host "rm -rf www/_old"
+```
 
 ## 环境变量
 
