@@ -924,7 +924,7 @@ div{ height: 2rem; }
 
 ## flex布局中的参数
 
-- flex为`flex-grow、flex-shrink、flex-basic`的缩写，默认值为 0 1 auto
+- flex为`flex-grow、flex-shrink、flex-basic`的缩写，默认值为 0 1 auto，`flex-basic: auto`` 表现为 `min-content`
   - flex: auto (1 1 auto)
   - flex: none (0 0 auto)
   - flex: initial (0 1 auto)
