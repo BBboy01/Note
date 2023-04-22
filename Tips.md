@@ -1,3 +1,9 @@
+## 安装未向苹果付费认证的软件
+
+```bash
+brew install --cask $application-name --no-quarantine
+```
+
 ## 获取安装时使用的包管理器类型
 
 当使用 `npm install` `yarn install` `pnpm install` 时，会在环境变量中创建对应包管理器的环境变量
