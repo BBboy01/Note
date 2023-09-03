@@ -161,6 +161,8 @@ tail -F /var/log/httpd/access_log
   - ENTRYPOINT 容器启动后执行的命令（无法被替换），并把启动时指定的自己指定的命令作为其参数
 - 构建的时候可以对一些缓存进行清理来减少构建后的镜像的大小`yum clean all && rm -rf /var/cache/yum/*`
 
+使用 ENRTYPOINT 指定的命令需要在运行容器时通过 --entrypoint 来覆盖, 通常使用 ENTRYPOINT 指定固定命令, CMD 指定参数
+
 ## 文件的分层
 
 - docker在生成新的镜像的时候是分层生成的，分层则是根据之前对镜像进行文件大小变化的记录进行分层，无文件大小变化的操作作为容器的属性不在分层中，使用`docker history 镜像id或名称`查看历史对该镜像的所有操作。
