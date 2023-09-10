@@ -18,6 +18,7 @@ brew install --cask $application-name --no-quarantine
 ```
 
 - npm
+
 ```json
 {
   npm_config_metrics_registry: 'https://registry.npmjs.org/',

@@ -1,20 +1,13 @@
-## 安装
+## buildkit 构建镜像
 
-```shell
-yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
-yum install docker-ce docker-ce-cli containerd.io -y
+- `RUN --mount=type=bind,from=stage_or_image,source=souce_file_path,target=target_path` 的形式来将生产环境不需要的文件单独使用一次, 即便该一次性文件变化也不会影响构建缓存, 同时该步骤不会产生额外的 layer
+  
+- `RUN --mount=type=cache,target=path_to_cache` 的形式来将缓存上次执行的结果, 加速后续构建, 同时该步骤不会产生额外的 layer
 
-mkdir /etc/docker
+## Tips
 
-tee /etc/docker/daemon.json << 'EOF'
-{
-	"registry-mirrors": ["https://registry.docker-cn.com"]
-}
-EOF
-
-systemctl daemon-reload
-systemctl restart docker
-```
+- 删除构建缓存 `docker builder prune -af`
+- 删除镜像缓存 `docker image prune -af`
 
 ## 容器的常用管理命令
 
@@ -23,6 +16,7 @@ systemctl restart docker
 - 搜索镜像`docker search xxx`
 
 - 获取镜像`docker pull xxx:xx`
+
   - 不指定版本时默认安装`latest`
   - 官方pull`docker pull centos:6.8`
   - 私有仓库pull`docker pull daoclub.io/huangzhichong/alpine-cn:latest`
@@ -62,7 +56,7 @@ systemctl restart docker
   - `docker attach 容器id或名称` 共享终端
 - 删除容器`docker rm 容器id或名称`
   - `-f` 连运行中的容器也一同删除
-- 批量删除容器 docker rm -f  &#96; docker ps -a -q &#96;
+- 批量删除容器 docker rm -f &#96; docker ps -a -q &#96;
 - 查看容器启动后的输出内容（排错）`docker logs 容器id或名称`
 - 查看容器的端口映射`docker port 容器id`
 - 将本地的文件拷贝到容器中`docker cp 本地文件 容器名称:目录`
@@ -142,15 +136,15 @@ tail -F /var/log/httpd/access_log
 - 用Dockerfile构建镜像`docker build -t 构建后的容器名称:标签 Dockerfile的目录`
 - 使用Dockerfile构建的过程中，每一个 RUN 中的命令执行的时候都会构建一个临时的容器，执行完后基于当前的临时容器执行下一条 RUN 命令并一个新的临时容器同时删除之前的临时容器，而每次创建容器的时候为了变更容器主机名都会覆盖`/etc/resolv.conf、/etc/hostname、/etc/hosts`这三个文件，因此如果后续 RUN 中的命令要用到这三个文件被之前的 RUN 修改后的数据，需要把后续命令用`&&`连接为一条命令执行
 - Dockerfile主要组成部分:
-  - 基础镜像信息               FROM    centos:6.9
-  - 制作镜像操作指令        RUN    yum install openssh-server -y
-  - 容器启动时执行指令    CMD    ["/bin/bash", "/init.sh"]
+  - 基础镜像信息 FROM centos:6.9
+  - 制作镜像操作指令 RUN yum install openssh-server -y
+  - 容器启动时执行指令 CMD ["/bin/bash", "/init.sh"]
 - Dockerfile常用指令
   - FROM 这个镜像的基础镜像
   - MANITAINER 指定维护者信息，可选
   - LABLE 描述，标签
   - RUN 制作镜像时需要做的事情
-  - ADD 将宿主机上的某个文件copy到容器里(tar 自动解压) 
+  - ADD 将宿主机上的某个文件copy到容器里(tar 自动解压)
   - WORKDIR 设置当前工作目录，不设置默认是`/`开始
   - VOLUME 设置卷，挂载宿主机目录
   - EXPOSE 声明容器运行的服务端口
@@ -193,7 +187,7 @@ docker中每建立一个容器都会创建两个虚拟网卡，一个为容器�
 
 ```json
 {
-	"insecure-registries": ["10.0.0.11:5000"]
+  "insecure-registries": ["10.0.0.11:5000"]
 }
 ```
 
@@ -226,6 +220,7 @@ docker中每建立一个容器都会创建两个虚拟网卡，一个为容器�
     
     docker run -d -p 5000:5000 -v /opt/registry-var/auth/:/auth/ -v /opt/myregistry:/var/lib/registry -e "REGISTRY_AUTH=htpasswd" -e "REGISTRY_AUTH_HTPASSWD_REALH=Registry Realm" -e "REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd" registry
     ```
+
     登录`docker login -uoldboy -p123456 10.0.0.11:5000`
 
 ## Docker网络类型
@@ -234,7 +229,7 @@ docker中每建立一个容器都会创建两个虚拟网卡，一个为容器�
 
 查看网段详情`docker network inspect 网段名称或id`，里面会显示这个网段中每个容器的IP信息
 
-- none 不为容器配置任何网络功能  `--network none`
+- none 不为容器配置任何网络功能 `--network none`
 - container 与另一个运行中的容器共享主机名、IP、端口 `--network container:容器id`
 - host 与宿主机共享主机名、IP、端口 `--network host`
 - bridge （默认）桥接的方式通过NAT转换使用网络功能
@@ -265,7 +260,7 @@ docker中每建立一个容器都会创建两个虚拟网卡，一个为容器�
 
   ```shell
   version: '3'
-  
+
   services:
     db:
       image: mysql:5.7
@@ -277,7 +272,7 @@ docker中每建立一个容器都会创建两个虚拟网卡，一个为容器�
         MYSQL_DATABASE: wordpress
         MYSQL_USER: wordpress
         MYSQL_PASSWORD: wordpress
-  
+
     wordpress:
       depends_on:
         - db
@@ -337,4 +332,3 @@ http {
     }
 }
 ```
-
