@@ -78,8 +78,8 @@ git 中有 HEAD 和 branch 两个指针，HEAD 用来指向当前所在的 commi
 
 ```git
 [remote "origin"]
-				url = 远程仓库UIL
-				fetch = +refs/heads/*:refs/remotes/origin/* 本地分支与远程分支文件夹
+    url = 远程仓库UIL
+    fetch = +refs/heads/*:refs/remotes/origin/* 本地分支与远程分支文件夹
 ```
 
 当本地修改完执行 `git push -u origin master` 后会创建一个新的 `master` 分支，同时会创建 `.git/refs/remotes` 目录、`.git/refs/remotes/origin` 目录、`.git/refs/remotes/origin/master` 文件、`.git/logs/refs/remotes` 目录和`.git/logs/refs/remotes/origin` 目录、`.git/logs/refs/remotes/master` 文件
@@ -311,60 +311,60 @@ $ git checkout <stash@{n}> -- <file-path>
 
 ```git
 1.给远程仓库起别名
-	git remote add origin 远程仓库地址
+ git remote add origin 远程仓库地址
 2.向远程推送代码
-	git push -u origin 分支名称
+ git push -u origin 分支名称
 ```
 
 到公司新电脑上第一次获取代码
 
 ```git
 1.克隆远程仓库代码
-	git clone 远程仓库地址
+ git clone 远程仓库地址
 2.切换分支
-	git checkout 分支名称
+ git checkout 分支名称
 ```
 
 在公司进行开发
 
 ```git
 1.切换到dev分支进行开发
-	git checkout dev
+ git checkout dev
 2.把master分支合并到dev[仅一次]
-	git merge master
+ git merge master
 3.修改代码
 4.提交代码
-	git add .
-	git commit -m 'xx'
-	git push origin dev
+ git add .
+ git commit -m 'xx'
+ git push origin dev
 ```
 
 回到家中继续写代码
 
 ```gti
 1.切换到dev分支进行开发
-	git checkout dev
+ git checkout dev
 2.拉代码
-	git pull origin dev
+ git pull origin dev
 3.继续开发
 4.提交代码
-	git add .
-	git commit -m 'xx'
-	git push origin dev
+ git add .
+ git commit -m 'xx'
+ git push origin dev
 ```
 
 回到公司继续开发
 
 ```git
 1.切换到dev分支进行开发
-	git checkout dev
+ git checkout dev
 2.拉代码
-	git pull origin dev
+ git pull origin dev
 3.继续开发
 4.提交代码
-	git add .
-	git commit -m 'xx'
-	git push origin dev
+ git add .
+ git commit -m 'xx'
+ git push origin dev
 ```
 
 ## 快速解决冲突
@@ -479,12 +479,12 @@ gti mergetool
 
   ```git
   1.生成公钥和私钥(默认放在 ~/.ssh)
-  	ssh-keygen
+   ssh-keygen
   2.拷贝公钥的内容，并设置到github中
   3.在git本地中配置ssh地址
-  	git remote add origin git@github.com:BBboy01/ChangeStype.git
+   git remote add origin git@github.com:BBboy01/ChangeStype.git
   4.以后使用
-  	git push origin master
+   git push origin master
   ```
 
 - git自动管理凭证
@@ -502,7 +502,13 @@ git commit -m 'gitignore updated'
 git push
 ```
 
-## 配置 `commitizen`
+## 条件配置
 
-1. 下载 `npm install -g commitizen cz-conventional-changelog`
-2. 配置 `echo '{ "path": "cz-conventional-changelog" }' > ~/.czrc`
+为不同目录下的 `git` 项目使用不同的 `gitconig` 配置
+
+```git
+[includeIf "gitdir:~/personal/"]
+    path = ~/personal/.gitconfig
+[includeIf "gitdir:~/work/"]
+    path = ~/work/.gitconfig
+```
