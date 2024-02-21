@@ -1,3 +1,7 @@
+## 配置文件查找目录
+
+[XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
+
 ## 令远程服务器可以使用本地代理
 
 - `ssh -NR localhost:local_proxy_port:localhost:remote_will_proxy_port username:host`
