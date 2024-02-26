@@ -5,13 +5,13 @@
 > 一路`Enter`，最后会在 ~/.ssh 目录下生成两个文件 id_rsa.pub和id_rsa ，前者是公钥，后者是私钥
 
 ```shell
-ssh-keygen -t rsa -C '你的邮箱'
+ssh-keygen -t ed25519 -C '注释'
 ```
 
 - 之后将公钥添加到服务器上
 
 ```shell
-ssh-copy-id -i ~/.ssh/id_rsa.pub 服务器主机用户名@服务器地址
+ssh-copy-id -i ~/.ssh/id_rsa.pub 服务器主机用户名@服务器地址
 ```
 
 # ssh别名登录
@@ -30,7 +30,9 @@ User root
 然后便可以通过`ssh nickname`别名登录服务器了
 
 # 添加**心跳**避免长时间不操作导致断开
+
 `vim ~/.ssh/config`
+
 ```bash
 Host *
 	ServerAliveInterval 30
