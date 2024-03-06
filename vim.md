@@ -75,6 +75,14 @@ searching mode:
 - `\{number}` 表示匹配的组, `s/string_\(\w*\)/\1/`
 - `&` 表示匹配的字符, `s/string_pattern/&/`
 
+sort:
+
+- `sort` 将所有行排序
+- `sort!` 将所有行逆序排序
+- `sort u` 将所有行去重并排序
+- `sort i` 将忽略所有行大小写排序
+- `sort n` 将所有按数字顺序排序
+
 # 命令
 
 - `set nocompatible` 设置只在当前项目进行搜索（放在配置最前面）
