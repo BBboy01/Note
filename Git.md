@@ -426,6 +426,12 @@ gti mergetool
   git log --graph --pretty==format:"%h %s"
   ```
 
+- 删除当前仓库下所有 untract 的文件和文件夹
+
+不包括.gitignore 中指定的文件和文件夹 `git clean -df`
+
+包括.gitignore 中指定的文件和文件夹 `git clean -xdf`
+
 # 给开源软件贡献代码
 
 1.fork源代码
